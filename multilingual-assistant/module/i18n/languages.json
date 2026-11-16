@@ -1,0 +1,8 @@
+[
+  { "code": "en", "name": "English", "dir": "ltr", "speech": "en-US", "addis": "none" },
+  { "code": "am", "name": "አማርኛ", "dir": "ltr", "speech": "am-ET", "addis": "am-hamen" },
+  { "code": "om", "name": "Afaan Oromoo", "dir": "ltr", "speech": "om-ET", "addis": "om-bikila" },
+  { "code": "ti", "name": "ትግርኛ", "dir": "ltr", "speech": "ti-ET", "addis": "ti-berhane" },
+  { "code": "so", "name": "Soomaali", "dir": "ltr", "speech": "so-SO", "addis": "catalog" },
+  { "code": "ar", "name": "العربية", "dir": "rtl", "speech": "ar-SA", "addis": "none" }
+]

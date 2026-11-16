@@ -1,0 +1,136 @@
+/**
+ * Rebuild the shared ALX knowledge files from the bot FAQ plus pages on
+ * https://www.alxafrica.com/. Run: node demo/build-alx-knowledge.js
+ *
+ * Fees are stored only as the two different statements the site publishes.
+ * Opening years are not stored.
+ */
+
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const botData = path.resolve(here, "../../savahana-bot/bot/telegram-bot/src/data/data.js");
+const assistantOut = path.join(here, "data", "alx-knowledge.json");
+const botOut = path.resolve(here, "../../savahana-bot/bot/telegram-bot/src/data/siteKnowledge.json");
+
+const LANGS = ["en", "am", "om", "ti", "so", "ar"];
+
+const siteSections = [
+  {
+    id: "career_pathways",
+    title: "ALX career pathways",
+    url: "https://www.alxafrica.com/",
+    lang: "en",
+    text: "The ALX homepage groups career pathways into three areas. AI & Data is described as preparation for roles in data and AI. Creative is described as getting hired as a professional creative or earning independently with a portfolio. Entrepreneurship is described as launching a freelance career, starting a venture, or building income streams. The page does not promise a job or an income.",
+  },
+  {
+    id: "homepage_figures",
+    title: "Figures published on the ALX homepage",
+    url: "https://www.alxafrica.com/",
+    lang: "en",
+    text: "The ALX homepage publishes these figures: 347.1K total number of graduates, 43.4K young entrepreneurs supported, 257.9K total youth in work, and 60.1K jobs created through entrepreneurship. These are the figures printed on that page. This assistant does not update them live.",
+  },
+  {
+    id: "data_analytics_shape",
+    title: "How the Data Analytics programme is described",
+    url: "https://www.alxafrica.com/programme/data-analytics/",
+    lang: "en",
+    text: "The Data Analytics programme page lists a duration of 7 weeks at 20 hours per week and a beginner level. It says companies hire people who can turn data into decisions. The knowledge areas it names are Data and AI Literacy Foundations, Data Analytics with Spreadsheets, SQL for Data, and Power BI for Data Analytics. Spreadsheets cover cleaning, governance, and descriptive analytics. SQL covers querying relational data and an introduction to PostgreSQL. Power BI covers data modeling, Power Query, DAX expressions, and dashboards. The current start date is not stored here. Check the programme page.",
+  },
+  {
+    id: "data_analytics_practice",
+    title: "What data analytics means on the ALX programme page",
+    url: "https://www.alxafrica.com/programme/data-analytics/",
+    lang: "en",
+    text: "The Data Analytics page says data analytics is examining data to find patterns, draw conclusions, and support decision-making. It says data analysts collect and clean data, apply statistical methods, build visualisations, and translate findings into insights. It names roles such as Data Analyst, Business Intelligence Analyst, Reporting Analyst, Database Analyst, Junior Data Analyst, Operations Analyst, and Marketing Analyst, across finance, healthcare, marketing, operations, government, and technology. It says the programme builds from the ground up and that prior coding experience or advanced mathematics is not required. It says logical thinking, interest in how organisations make decisions, and practice with SQL and Power BI are what a learner needs. After the programme, the page says a learner can collect and clean raw datasets, run descriptive and statistical analysis, write SQL queries, build Power BI dashboards, and present data-driven recommendations. It does not promise a job.",
+  },
+  {
+    id: "professional_foundations",
+    title: "Professional Foundations and Data Analytics",
+    url: "https://www.alxafrica.com/programme/data-analytics/",
+    lang: "en",
+    text: "The Data Analytics page says that completing the first Data Analytics short course automatically enrols a learner in Professional Foundations, and that both continue in parallel. It says Professional Foundations is required for the Data Analytics Programme Certificate, and that a learner does not need to finish it before continuing the Data Analytics short courses. It says a learner who already completed Professional Foundations in a previous programme is not asked to repeat it.",
+  },
+  {
+    id: "chair_values",
+    title: "ALX CHAIR values",
+    url: "https://www.alxafrica.com/how-to-ace-your-alx-application/",
+    lang: "en",
+    text: "The application article says ALX looks for learners who align with its CHAIR values: Courage, Humility, Adventure, Initiative, and Resilience. It says those values run from application to graduation, and that an open mindset helps a learner get more from the experience. It gives persisting through the application until it is submitted as an example of resilience.",
+  },
+  {
+    id: "choosing_a_programme",
+    title: "How the application article says to choose a programme",
+    url: "https://www.alxafrica.com/how-to-ace-your-alx-application/",
+    lang: "en",
+    text: "The application article says a person can judge fit by time commitment, career goals, and interests. It says some programmes ask for at least 20 hours per week and others ask for 70 hours per week. It says learners should read what each programme offers. It says ALX has a Programme Finder tool to help with that choice. The current list of programmes is on https://www.alxafrica.com/programmes/.",
+  },
+  {
+    id: "beyond_technical_skills",
+    title: "What learners gain besides technical skills",
+    url: "https://www.alxafrica.com/how-to-ace-your-alx-application/",
+    lang: "en",
+    text: "The application article says many applicants expect only technical skills for jobs. It says that after joining, learners also get a community, mentorship, and soft-skills training. It says an accepted learner gets access to a community and continuous career support. It does not promise a job or an income.",
+  },
+  {
+    id: "application_tips",
+    title: "Application tips and deferral",
+    url: "https://www.alxafrica.com/how-to-ace-your-alx-application/",
+    lang: "en",
+    text: "The application article's tips are: be authentic, seek help, and follow the instructions before each section. Help channels it names are other applicants, weekly office hours, resources on the application page, and the support team. It says an unfinished application is stored so the person does not have to enter every detail again. It says someone who is accepted and cannot join can defer enrolment to the next cohort. Deadlines are not stored here.",
+  },
+  {
+    id: "cost_and_sponsorship",
+    title: "What the site says about cost and sponsorship",
+    url: "https://www.alxafrica.com/",
+    lang: "en",
+    text: "The ALX homepage says a partnership with the Mastercard Foundation allows eligible learners to access sponsored programme training, global university partners, a peer learning community, and online and in-person infrastructure for $5 a month. The application article says the same partnership offers eligible candidates tuition sponsorship to pursue programmes at no cost, and that a learner admitted to a paid programme on full tuition sponsorship pays a one-time non-refundable administration fee. It describes the eligibility it states for that sponsorship as being between 18 and 34 and of African origin. It does not state the administration fee amount. The two pages do not state the same price. This assistant does not choose between them and does not store a current fee. Check https://www.alxafrica.com/programmes/ for the current cost and eligibility.",
+  },
+];
+
+function faqSection(entry) {
+  const lines = [];
+  for (const code of LANGS) {
+    lines.push("Question (" + code + "): " + entry.question[code]);
+    lines.push("Answer (" + code + "): " + entry.answer[code]);
+  }
+  return {
+    id: entry.id,
+    title: entry.question.en,
+    url: entry.sourceUrl,
+    lang: "en",
+    text: lines.join("\n"),
+  };
+}
+
+const { faqEntries } = await import(pathToFileURL(botData).href);
+const sections = faqEntries.map(faqSection).concat(siteSections);
+
+fs.writeFileSync(
+  assistantOut,
+  JSON.stringify(
+    {
+      title: "ALX information",
+      note: "Built from the Telegram bot FAQ and pages on https://www.alxafrica.com/. Regenerate with node demo/build-alx-knowledge.js.",
+      sections: sections,
+    },
+    null,
+    2
+  ) + "\n"
+);
+
+fs.writeFileSync(
+  botOut,
+  JSON.stringify(
+    {
+      note: "Extra pages from https://www.alxafrica.com/. The FAQ itself stays in data.js. Regenerate from savanna-assistant with node demo/build-alx-knowledge.js.",
+      sections: siteSections,
+    },
+    null,
+    2
+  ) + "\n"
+);
+
+console.log("wrote " + sections.length + " assistant sections and " + siteSections.length + " site sections");

@@ -1,0 +1,223 @@
+<!doctype html>
+<!--
+  Test listings page. The five jobs are sample data from demo/data/jobs.json.
+  They are not real vacancies. One JobPosting block per listing.
+-->
+<html lang="en">
+  <head>
+    <style class="vjs-styles-defaults">
+      .video-js {
+        width: 300px;
+        height: 150px;
+      }
+
+      .vjs-fluid:not(.vjs-audio-only-mode) {
+        padding-top: 56.25%;
+      }
+    </style>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="Five test job listings. Not real vacancies." />
+    <meta name="google" content="notranslate" />
+
+    <!-- Google Tag Manager -->
+
+    <!-- End Google Tag Manager -->
+
+    <title>Test listings | G-School Intranet</title>
+
+    <link rel="stylesheet" href="../assets/css/typekit-xgz4ilr-css.css" />
+    <link rel="stylesheet" href="../assets/css/application_alx.css" media="all" />
+
+    <link rel="icon" type="image/x-icon" href="/favicon_alx.ico" />
+
+    <link rel="apple-touch-icon" href="/apple-touch-icon_alx.png" />
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- React -->
+
+    <link rel="stylesheet" href="../assets/css/app.css" media="all" />
+
+    <link rel="stylesheet" href="../assets/css/static-page.css" media="all" />
+    <style>
+      main a:link,
+      main a:visited {
+        color: #002b56;
+        text-decoration: underline;
+      }
+    </style>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "JobPosting",
+        "title": "Test listing: Inbox assistant",
+        "description": "Test listing only, not a real vacancy. A sample client wants weekday help sorting an email inbox and drafting short replies. About 10 hours a week. Remote.",
+        "datePosted": "2026-01-15",
+        "employmentType": "PART_TIME",
+        "jobLocationType": "TELECOMMUTE",
+        "hiringOrganization": { "@type": "Organization", "name": "Sample client (test data, not a real employer)" },
+        "jobLocation": { "@type": "Place", "name": "Remote", "address": { "@type": "PostalAddress", "addressCountry": "ET" } },
+        "jobBenefits": "About 10 hours a week. Test data only."
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "JobPosting",
+        "title": "Test listing: Calendar coordinator",
+        "description": "Test listing only, not a real vacancy. A sample team wants help keeping calendar holds across three time zones and sending reminder notes. About 8 hours a week. Remote.",
+        "datePosted": "2026-01-16",
+        "employmentType": "PART_TIME",
+        "jobLocationType": "TELECOMMUTE",
+        "hiringOrganization": { "@type": "Organization", "name": "Sample team (test data, not a real employer)" },
+        "jobLocation": { "@type": "Place", "name": "Remote", "address": { "@type": "PostalAddress", "addressCountry": "ET" } },
+        "jobBenefits": "About 8 hours a week. Test data only."
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "JobPosting",
+        "title": "Test listing: Customer reply assistant",
+        "description": "Test listing only, not a real vacancy. A sample shop wants help answering simple refund requests with a calm, clear tone. About 12 hours a week. Remote.",
+        "datePosted": "2026-01-17",
+        "employmentType": "PART_TIME",
+        "jobLocationType": "TELECOMMUTE",
+        "hiringOrganization": { "@type": "Organization", "name": "Sample shop (test data, not a real employer)" },
+        "jobLocation": { "@type": "Place", "name": "Remote", "address": { "@type": "PostalAddress", "addressCountry": "ET" } },
+        "jobBenefits": "About 12 hours a week. Test data only."
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "JobPosting",
+        "title": "Test listing: Research notes assistant",
+        "description": "Test listing only, not a real vacancy. A sample founder wants briefing notes pulled from public pages into a shared document. About 6 hours a week. Remote.",
+        "datePosted": "2026-01-18",
+        "employmentType": "PART_TIME",
+        "jobLocationType": "TELECOMMUTE",
+        "hiringOrganization": { "@type": "Organization", "name": "Sample founder (test data, not a real employer)" },
+        "jobLocation": { "@type": "Place", "name": "Remote", "address": { "@type": "PostalAddress", "addressCountry": "ET" } },
+        "jobBenefits": "About 6 hours a week. Test data only."
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "JobPosting",
+        "title": "Test listing: Social media scheduler",
+        "description": "Test listing only, not a real vacancy. A pretend bakery wants a weekly social media calendar and short post drafts. About 5 hours a week. Remote.",
+        "datePosted": "2026-01-19",
+        "employmentType": "PART_TIME",
+        "jobLocationType": "TELECOMMUTE",
+        "hiringOrganization": { "@type": "Organization", "name": "Pretend bakery (test data, not a real employer)" },
+        "jobLocation": { "@type": "Place", "name": "Remote", "address": { "@type": "PostalAddress", "addressCountry": "ET" } },
+        "jobBenefits": "About 5 hours a week. Test data only."
+      }
+    </script>
+  </head>
+
+  <body>
+    <main id="content">
+      <h1>Test listings</h1>
+      <p>These five listings are test data only. They are not real vacancies.</p>
+      <ul>
+        <li id="test-job-inbox">
+          <h2>Test listing: Inbox assistant</h2>
+          <p>Test listing only, not a real vacancy. A sample client wants weekday help sorting an email inbox and drafting short replies. About 10 hours a week. Remote.</p>
+          <dl>
+            <dt>Posted</dt>
+            <dd><time datetime="2026-01-15">15 January 2026</time></dd>
+            <dt>Employment</dt>
+            <dd>Part time</dd>
+            <dt>Location</dt>
+            <dd>Remote</dd>
+            <dt>Employer</dt>
+            <dd>Sample client (test data, not a real employer)</dd>
+            <dt>Hours</dt>
+            <dd>About 10 hours a week</dd>
+          </dl>
+          <p><a href="/demo/data/jobs.json#test-job-inbox">Source of this test listing</a></p>
+        </li>
+        <li id="test-job-calendar">
+          <h2>Test listing: Calendar coordinator</h2>
+          <p>Test listing only, not a real vacancy. A sample team wants help keeping calendar holds across three time zones and sending reminder notes. About 8 hours a week. Remote.</p>
+          <dl>
+            <dt>Posted</dt>
+            <dd><time datetime="2026-01-16">16 January 2026</time></dd>
+            <dt>Employment</dt>
+            <dd>Part time</dd>
+            <dt>Location</dt>
+            <dd>Remote</dd>
+            <dt>Employer</dt>
+            <dd>Sample team (test data, not a real employer)</dd>
+            <dt>Hours</dt>
+            <dd>About 8 hours a week</dd>
+          </dl>
+          <p><a href="/demo/data/jobs.json#test-job-calendar">Source of this test listing</a></p>
+        </li>
+        <li id="test-job-replies">
+          <h2>Test listing: Customer reply assistant</h2>
+          <p>Test listing only, not a real vacancy. A sample shop wants help answering simple refund requests with a calm, clear tone. About 12 hours a week. Remote.</p>
+          <dl>
+            <dt>Posted</dt>
+            <dd><time datetime="2026-01-17">17 January 2026</time></dd>
+            <dt>Employment</dt>
+            <dd>Part time</dd>
+            <dt>Location</dt>
+            <dd>Remote</dd>
+            <dt>Employer</dt>
+            <dd>Sample shop (test data, not a real employer)</dd>
+            <dt>Hours</dt>
+            <dd>About 12 hours a week</dd>
+          </dl>
+          <p><a href="/demo/data/jobs.json#test-job-replies">Source of this test listing</a></p>
+        </li>
+        <li id="test-job-research">
+          <h2>Test listing: Research notes assistant</h2>
+          <p>Test listing only, not a real vacancy. A sample founder wants briefing notes pulled from public pages into a shared document. About 6 hours a week. Remote.</p>
+          <dl>
+            <dt>Posted</dt>
+            <dd><time datetime="2026-01-18">18 January 2026</time></dd>
+            <dt>Employment</dt>
+            <dd>Part time</dd>
+            <dt>Location</dt>
+            <dd>Remote</dd>
+            <dt>Employer</dt>
+            <dd>Sample founder (test data, not a real employer)</dd>
+            <dt>Hours</dt>
+            <dd>About 6 hours a week</dd>
+          </dl>
+          <p><a href="/demo/data/jobs.json#test-job-research">Source of this test listing</a></p>
+        </li>
+        <li id="test-job-social">
+          <h2>Test listing: Social media scheduler</h2>
+          <p>Test listing only, not a real vacancy. A pretend bakery wants a weekly social media calendar and short post drafts. About 5 hours a week. Remote.</p>
+          <dl>
+            <dt>Posted</dt>
+            <dd><time datetime="2026-01-19">19 January 2026</time></dd>
+            <dt>Employment</dt>
+            <dd>Part time</dd>
+            <dt>Location</dt>
+            <dd>Remote</dd>
+            <dt>Employer</dt>
+            <dd>Pretend bakery (test data, not a real employer)</dd>
+            <dt>Hours</dt>
+            <dd>About 5 hours a week</dd>
+          </dl>
+          <p><a href="/demo/data/jobs.json#test-job-social">Source of this test listing</a></p>
+        </li>
+      </ul>
+    </main>
+    <script src="/module/db-assistant.js" data-lang="auto" data-api="/api" data-content="/demo/content.json" defer></script>
+  </body>
+</html>

@@ -1,0 +1,593 @@
+openapi: 3.0.3
+info:
+  title: Savanna Assistant API
+  version: 0.2.0
+  description: >
+    Server for the Savanna Assistant widget. Model and speech keys stay in the
+    server environment. Answers are retrieved from course sections first. The
+    model is not called when nothing is above the search threshold. This file
+    is written by hand to match the routes in api/.
+servers:
+  - url: http://localhost:8080
+    description: nginx on the Compose web port
+  - url: http://localhost:3000
+    description: the api service directly
+paths:
+  /api/v1/health:
+    get:
+      summary: Which providers are configured
+      operationId: health
+      responses:
+        "200":
+          description: Booleans only. True means that provider has the settings it needs.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+        "429":
+          $ref: "#/components/responses/TooMany"
+  /api/v1/ask:
+    post:
+      summary: Answer a question from course sections
+      operationId: ask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskRequest"
+      responses:
+        "200":
+          description: >
+            A retrieved answer, a model answer, an offline fallback, or
+            answer null when nothing matched. The model is not called for a
+            not-found result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AskResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "413":
+          $ref: "#/components/responses/TooLarge"
+        "429":
+          $ref: "#/components/responses/TooMany"
+  /api/v1/content:
+    post:
+      summary: Index lesson sections for later questions
+      operationId: indexContent
+      description: >
+        The host sends sections once. They stay in memory until the process
+        stops. Later POST /api/v1/ask calls that omit sections, and
+        POST /sms/inbound, search this set instead of the demo course.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentRequest"
+      responses:
+        "201":
+          description: The sections replaced the in-memory index.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [indexed]
+                properties:
+                  indexed:
+                    type: integer
+                    minimum: 1
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "413":
+          $ref: "#/components/responses/TooLarge"
+        "429":
+          $ref: "#/components/responses/TooMany"
+  /api/v1/tts:
+    post:
+      summary: Speech audio for a short text
+      operationId: tts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TtsRequest"
+      responses:
+        "200":
+          description: >
+            Audio bytes. Addis Voices 2 is used for am, om, ti, and so when
+            configured. English and other languages use Gemini speech when a
+            Gemini key is set. Mock mode sends header X-DB-TTS: mock.
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "501":
+          description: Speech for this language is not configured. The client should use browser speech.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "429":
+          $ref: "#/components/responses/TooMany"
+  /api/v1/translate:
+    post:
+      summary: Translate a batch of strings
+      operationId: translate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TranslateRequest"
+      responses:
+        "200":
+          description: Translated strings in the same order and the same length. An item the model does not return is the original string. Repeated batches are served from memory.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranslateResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "502":
+          description: Gemini rejected the request or its text was not a JSON array. reason is rate_limit, bad_key, bad_model, or bad_response.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Error"
+                  - type: object
+                    properties:
+                      reason:
+                        type: string
+                        enum: [rate_limit, bad_key, bad_model, bad_response]
+        "429":
+          description: Gemini rate limit remained after one wait and retry.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Error"
+                  - type: object
+                    properties:
+                      reason:
+                        type: string
+                        enum: [rate_limit]
+        "503":
+          description: Translation is not configured.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/escalations:
+    post:
+      summary: Open a ticket for a person
+      operationId: createEscalation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EscalationRequest"
+      responses:
+        "201":
+          description: Ticket stored. Registered webhooks are posted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ticketId]
+                properties:
+                  ticketId:
+                    type: string
+                    example: db-abc123
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooMany"
+    get:
+      summary: List waiting tickets
+      operationId: listEscalations
+      security:
+        - helperToken: []
+        - helperBearer: []
+      responses:
+        "200":
+          description: Waiting tickets only.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [tickets]
+                properties:
+                  tickets:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Ticket"
+        "401":
+          description: The helper token was not accepted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          description: Helper access is not configured.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          $ref: "#/components/responses/TooMany"
+  /api/v1/escalations/{ticketId}:
+    patch:
+      summary: Mark a ticket answered
+      operationId: answerEscalation
+      security:
+        - helperToken: []
+        - helperBearer: []
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                status:
+                  type: string
+                  example: answered
+      responses:
+        "200":
+          description: The ticket is no longer waiting.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ticketId, status]
+                properties:
+                  ticketId:
+                    type: string
+                  status:
+                    type: string
+                    example: answered
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: The helper token was not accepted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: That ticket was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          $ref: "#/components/responses/TooMany"
+  /api/v1/webhooks:
+    post:
+      summary: Register a URL for ticket events
+      operationId: registerWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookRequest"
+      responses:
+        "201":
+          description: Registered in memory until the process restarts.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id]
+                properties:
+                  id:
+                    type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooMany"
+  /sms/inbound:
+    post:
+      summary: SMS reply from the same answer path
+      operationId: smsInbound
+      description: >
+        JSON in, plain text out. The reply is at most 160 characters.
+        The source is a short section title.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                from:
+                  type: string
+                  description: Optional. When present, an Ethiopian mobile number (09…, 07…, +251…, or 251…).
+                  example: "+251900000000"
+                text:
+                  type: string
+                  example: weekday inbox sorting
+      responses:
+        "200":
+          description: A plain-text reply of at most 160 characters.
+          content:
+            text/plain:
+              schema:
+                type: string
+                maxLength: 160
+        "400":
+          description: Text is required.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "429":
+          $ref: "#/components/responses/TooMany"
+components:
+  securitySchemes:
+    helperToken:
+      type: apiKey
+      in: header
+      name: X-Helper-Token
+    helperBearer:
+      type: http
+      scheme: bearer
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+    Health:
+      type: object
+      required: [ai, ttsAddis, ttsGemini, escalations]
+      properties:
+        ai:
+          type: boolean
+        ttsAddis:
+          type: boolean
+        ttsGemini:
+          type: boolean
+        escalations:
+          type: boolean
+        telegram:
+          type: string
+          description: Public Telegram bot username from TELEGRAM_BOT_USERNAME. Empty when unset. Not a secret.
+    Section:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+        text:
+          type: string
+        lang:
+          type: string
+    Source:
+      type: object
+      required: [title, url]
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+    AskRequest:
+      type: object
+      required: [question, language]
+      properties:
+        question:
+          type: string
+          maxLength: 1000
+        language:
+          type: string
+          example: en
+        sections:
+          type: array
+          description: When omitted, the server uses sections posted to /api/v1/content, or the demo course files if none were posted.
+          items:
+            $ref: "#/components/schemas/Section"
+    AskResponse:
+      type: object
+      required: [answer, sources, mode]
+      properties:
+        answer:
+          type: string
+          nullable: true
+        sources:
+          type: array
+          items:
+            $ref: "#/components/schemas/Source"
+        mode:
+          type: string
+          enum: [gemini, ollama, offline, offline-fallback, not-found]
+    ContentRequest:
+      type: object
+      required: [sections]
+      properties:
+        sections:
+          type: array
+          minItems: 1
+          maxItems: 40
+          items:
+            $ref: "#/components/schemas/Section"
+    TtsRequest:
+      type: object
+      required: [text, language]
+      properties:
+        text:
+          type: string
+          maxLength: 3000
+        language:
+          type: string
+          example: am
+    TranslateRequest:
+      type: object
+      required: [texts, target]
+      properties:
+        texts:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            type: string
+            maxLength: 2000
+        target:
+          type: string
+          example: am
+    TranslateResponse:
+      type: object
+      required: [texts]
+      properties:
+        texts:
+          type: array
+          items:
+            type: string
+    EscalationRequest:
+      type: object
+      required: [conversation]
+      properties:
+        language:
+          type: string
+        contact:
+          type: string
+          description: Optional Ethiopian mobile number. 09…, 07…, +251…, and 251… are stored as +251 and nine digits.
+        topic:
+          type: string
+          enum: [tutor, careers, alerts, accommodation]
+          default: tutor
+        page:
+          $ref: "#/components/schemas/PageContext"
+        context:
+          type: array
+          maxItems: 8
+          items:
+            $ref: "#/components/schemas/ContextItem"
+        conversation:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: object
+                required: [text]
+                properties:
+                  role:
+                    type: string
+                  text:
+                    type: string
+    Ticket:
+      type: object
+      properties:
+        ticketId:
+          type: string
+        language:
+          type: string
+        contact:
+          type: string
+        topic:
+          type: string
+          enum: [tutor, careers, alerts, accommodation]
+        page:
+          $ref: "#/components/schemas/PageContext"
+        context:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContextItem"
+        conversation:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                type: string
+              text:
+                type: string
+        createdAt:
+          type: string
+        status:
+          type: string
+          example: waiting
+    PageContext:
+      type: object
+      description: Where the learner was when they asked for a person. The helper page shows this. It is not posted to webhooks.
+      properties:
+        url:
+          type: string
+        heading:
+          type: string
+        selection:
+          type: string
+    ContextItem:
+      type: object
+      description: A short excerpt sent with the ticket, such as a sample listing.
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+        text:
+          type: string
+    WebhookRequest:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+            enum: [escalation.opened]
+  responses:
+    BadRequest:
+      description: The request was not usable.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    TooLarge:
+      description: The request is too large.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    TooMany:
+      description: Too many requests. Please wait a minute.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    BadGateway:
+      description: The upstream service did not complete.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"

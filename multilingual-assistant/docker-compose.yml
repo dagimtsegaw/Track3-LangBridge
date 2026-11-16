@@ -1,0 +1,39 @@
+# Static pages on :8080. The api service answers /api, /sms, /docs, and /helper.
+# ./savanna is the site root. ./module and ./demo are mounted at /module and /demo.
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    volumes:
+      - ./savanna:/usr/share/nginx/html:ro
+      - ./module:/module:ro
+      - ./demo:/demo:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  api:
+    build: ./api
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      AI_PROVIDER: ${AI_PROVIDER:-none}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash}
+      GEMINI_TTS_MODEL: ${GEMINI_TTS_MODEL:-gemini-2.5-flash-preview-tts}
+      TTS_PROVIDER: ${TTS_PROVIDER:-none}
+      ADDIS_API_KEY: ${ADDIS_API_KEY:-}
+      ADDIS_BASE_URL: ${ADDIS_BASE_URL:-https://api.addisassistant.com}
+      HELPER_TOKEN: ${HELPER_TOKEN:-}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-alxjobsbot}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./api/data:/app/data
+      - ./demo:/demo:ro
+      - ./module:/module:ro
+      - ./openapi.yaml:/openapi.yaml:ro

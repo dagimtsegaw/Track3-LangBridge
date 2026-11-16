@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Helper desk</title>
+  <style>
+    :root {
+      color: #1a1a1a;
+      background: #fff;
+      font-family: "Noto Sans Ethiopic", var(--bs-body-font-family, system-ui), sans-serif;
+      line-height: 1.7;
+    }
+    body {
+      margin: 0;
+      padding: 1rem;
+    }
+    main {
+      max-inline-size: 40rem;
+      margin-inline: auto;
+    }
+    h1, h2, h3, h4 { font-size: 1.25rem; font-weight: 700; line-height: 1.4; }
+    h1 { font-size: 1.5rem; }
+    label, p { display: block; }
+    input, textarea, button {
+      font: inherit;
+      line-height: 1.5;
+      min-block-size: 3rem;
+      min-inline-size: 3rem;
+      box-sizing: border-box;
+    }
+    input, textarea {
+      display: block;
+      inline-size: 100%;
+      margin-block: 0.25rem 1rem;
+      padding: 0.5rem;
+      border: 2px solid #002b56;
+      background: #fff;
+      color: #1a1a1a;
+    }
+    button {
+      background: #002b56;
+      color: #fff;
+      border: 3px solid #002b56;
+      padding-inline: 1rem;
+      margin-block-end: 1rem;
+    }
+    button.secondary {
+      background: #fff;
+      color: #1a1a1a;
+    }
+    :focus-visible {
+      outline: 3px solid #002b56;
+      outline-offset: 3px;
+    }
+    #tickets { padding-inline-start: 1.25rem; }
+    li { margin-block-end: 1.5rem; }
+    .turn { margin: 0; }
+    [role="alert"] { color: #6b1020; }
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Helper desk</h1>
+    <p>Waiting learners are listed after the token is accepted. This page does not store the token.</p>
+    <form id="gate">
+      <label for="token">Helper token</label>
+      <input id="token" name="token" type="password" autocomplete="current-password" required>
+      <button type="submit">Show waiting learners</button>
+    </form>
+    <p id="status" role="status"></p>
+    <p id="alert" role="alert"></p>
+    <h2>Waiting learners</h2>
+    <ul id="tickets"></ul>
+  </main>
+  <script type="module">
+    import { formatShownDate } from "/module/calendar.js";
+    (function () {
+      var token = "";
+      var gate = document.getElementById("gate");
+      var list = document.getElementById("tickets");
+      var status = document.getElementById("status");
+      var alertEl = document.getElementById("alert");
+
+      gate.addEventListener("submit", function (event) {
+        event.preventDefault();
+        token = document.getElementById("token").value;
+        load();
+      });
+
+      function headers() {
+        return { accept: "application/json", authorization: "Bearer " + token };
+      }
+
+      function load() {
+        alertEl.textContent = "";
+        status.textContent = "Loading waiting learners.";
+        fetch("/api/v1/escalations", { headers: headers() })
+          .then(function (response) {
+            return response.json().then(function (body) {
+              return { ok: response.ok, status: response.status, body: body };
+            });
+          })
+          .then(function (result) {
+            if (!result.ok) {
+              status.textContent = "";
+              alertEl.textContent = (result.body && result.body.error) || "The list could not be loaded.";
+              list.replaceChildren();
+              return;
+            }
+            draw(result.body.tickets || []);
+          })
+          .catch(function () {
+            status.textContent = "";
+            alertEl.textContent = "The list could not be loaded.";
+          });
+      }
+
+      function draw(tickets) {
+        list.replaceChildren();
+        if (!tickets.length) {
+          status.textContent = "No one is waiting.";
+          return;
+        }
+        status.textContent = tickets.length + " waiting.";
+        for (var i = 0; i < tickets.length; i += 1) {
+          list.appendChild(card(tickets[i]));
+        }
+      }
+
+      function safePageUrl(value) {
+        try {
+          var parsed = new URL(value, location.origin);
+          if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.href;
+        } catch (err) {
+          return "";
+        }
+        return "";
+      }
+
+      function appendPage(item, ticket) {
+        var page = ticket.page;
+        if (!page || (!page.url && !page.heading && !page.selection)) return;
+        var heading = document.createElement("h4");
+        heading.textContent = "Page";
+        item.appendChild(heading);
+        if (page.url) {
+          var urlLine = document.createElement("p");
+          var href = safePageUrl(page.url);
+          if (href) {
+            var link = document.createElement("a");
+            link.href = href;
+            link.textContent = page.url;
+            urlLine.appendChild(link);
+          } else {
+            urlLine.textContent = page.url;
+          }
+          item.appendChild(urlLine);
+        }
+        if (page.heading) {
+          var headLine = document.createElement("p");
+          headLine.lang = ticket.language || "en";
+          headLine.dir = "auto";
+          headLine.textContent = "Heading: " + page.heading;
+          item.appendChild(headLine);
+        }
+        if (page.selection) {
+          var selected = document.createElement("p");
+          selected.lang = ticket.language || "en";
+          selected.dir = "auto";
+          selected.textContent = "Selected text: " + page.selection;
+          item.appendChild(selected);
+        }
+      }
+
+      function appendContext(item, ticket) {
+        var context = ticket.context || [];
+        if (!context.length) return;
+        var heading = document.createElement("h4");
+        heading.textContent = "Context";
+        item.appendChild(heading);
+        var list = document.createElement("ul");
+        for (var i = 0; i < context.length; i += 1) {
+          var entry = document.createElement("li");
+          var title = document.createElement("p");
+          title.textContent = context[i].title || "";
+          var text = document.createElement("p");
+          text.dir = "auto";
+          text.textContent = context[i].text || "";
+          entry.appendChild(title);
+          entry.appendChild(text);
+          list.appendChild(entry);
+        }
+        item.appendChild(list);
+      }
+
+      function card(ticket) {
+        var item = document.createElement("li");
+        var title = document.createElement("h3");
+        title.textContent = ticket.ticketId + " (" + (ticket.language || "") + ")";
+        item.appendChild(title);
+        if (ticket.createdAt) {
+          var opened = document.createElement("p");
+          var time = document.createElement("time");
+          var lang = ticket.language || "en";
+          time.dateTime = ticket.createdAt;
+          time.lang = lang;
+          time.textContent = formatShownDate(ticket.createdAt, lang);
+          opened.appendChild(document.createTextNode("Opened "));
+          opened.appendChild(time);
+          item.appendChild(opened);
+        }
+        if (ticket.topic) {
+          var topic = document.createElement("p");
+          topic.textContent = "Topic: " + ticket.topic;
+          item.appendChild(topic);
+        }
+        if (ticket.contact) {
+          var contact = document.createElement("p");
+          contact.textContent = "Contact: " + ticket.contact;
+          item.appendChild(contact);
+        }
+        appendPage(item, ticket);
+        appendContext(item, ticket);
+        var talk = document.createElement("ol");
+        var turns = ticket.conversation || [];
+        for (var i = 0; i < turns.length; i += 1) {
+          var line = document.createElement("li");
+          var p = document.createElement("p");
+          p.className = "turn";
+          p.lang = ticket.language || "en";
+          p.dir = "auto";
+          p.textContent = (turns[i].role || "learner") + ": " + (turns[i].text || "");
+          line.appendChild(p);
+          talk.appendChild(line);
+        }
+        item.appendChild(talk);
+        var noteId = "note-" + ticket.ticketId;
+        var label = document.createElement("label");
+        label.htmlFor = noteId;
+        label.textContent = "Reply note";
+        var area = document.createElement("textarea");
+        area.id = noteId;
+        area.rows = 3;
+        var button = document.createElement("button");
+        button.type = "button";
+        button.className = "secondary";
+        button.textContent = "Mark answered";
+        button.addEventListener("click", function () {
+          mark(ticket.ticketId, area.value, item);
+        });
+        item.appendChild(label);
+        item.appendChild(area);
+        item.appendChild(button);
+        return item;
+      }
+
+      function mark(id, note, item) {
+        alertEl.textContent = "";
+        fetch("/api/v1/escalations/" + encodeURIComponent(id), {
+          method: "PATCH",
+          headers: {
+            "content-type": "application/json",
+            authorization: "Bearer " + token,
+          },
+          body: JSON.stringify({ note: note, status: "answered" }),
+        })
+          .then(function (response) {
+            return response.json().then(function (body) {
+              return { ok: response.ok, body: body };
+            });
+          })
+          .then(function (result) {
+            if (!result.ok) {
+              alertEl.textContent = (result.body && result.body.error) || "The ticket could not be updated.";
+              return;
+            }
+            item.remove();
+            status.textContent = "Marked as answered.";
+            if (!list.children.length) status.textContent = "No one is waiting.";
+          })
+          .catch(function () {
+            alertEl.textContent = "The ticket could not be updated.";
+          });
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+PROJECT: "Savanna Assistant" for the ALX Digital Bridge Accessibility Hackathon 2026, Track 3 (Multilingual assistant and live help). Deadline: Sunday 16:30. Judges score: co-designer usability 30, adoption/installability 25, Ethiopian localization 15, quality/security/privacy 15, maintainability/low cost 15. A module that fails the accessibility gate (axe: zero critical/serious; WCAG 2.2 AA; co-designer completes the task unaided) is NOT scored.
+
+WHAT WE BUILD: one lightweight, reusable JavaScript module any website installs with ONE script tag:
+
+  <script src="https://HOST/module/db-assistant.js" data-lang="auto" data-api="https://HOST/api" data-content="/content.json" defer></script>
+
+It auto-creates a <db-assistant> custom element (also usable manually as <db-assistant lang="am" api="..." content="...">). It must work inside the Savanna starter pages AND on an empty HTML page with no Bootstrap.
+
+REPO LAYOUT (create exactly this):
+README.md, CONFORMANCE.md, LICENSE (MIT), docker-compose.yml, .env.example, openapi.yaml
+module/ -> db-assistant.js (single file the host loads), i18n/en.json am.json om.json ti.json so.json ar.json, providers/, assets
+api/ -> Node.js (Express) server: AI proxy, TTS, SMS endpoint, escalations, docs
+demo/ -> blank.html (empty-site proof), content.json, data/ (test data only)
+savanna/ -> the starter, already cloned. UNCHANGED except one script tag added before </body> in the 3 pages in savanna/pages/ and index.html if present. Never edit application_alx.css, app.css, static-page.js.
+
+HARD RULES
+
+- Vanilla JS, no framework, no bundler required. Initial load under 500 KB; lazy-load language files and heavy features. Measure and report size.
+- All UI inside a Shadow DOM. CSS isolated from host. Use CSS logical properties (margin-inline-start etc.). Read host look via var(--bs-primary, #002b56), var(--bs-body-font-family, system-ui) with fallbacks. No global variables, no changes to host styles. Features that must change the host page (high contrast, text size, dyslexia font, read-on-hover) go through ONE injected <style id="db-a11y-effects"> and html classes prefixed "db-", fully reversible.
+- No sentence of UI text in code. Every string lives in i18n/<lang>.json. Adding a language = adding one JSON file + one entry in a languages list. Default fallback chain: selected -> en.
+- NEVER put API keys in browser code. All paid/cloud calls go through api/. Keys only in .env; commit .env.example only.
+- Honesty: if a provider is not configured/reachable, the UI says so in words and falls back (offline keyword search, browser speech). Never fake a working feature.
+- The assistant answers ONLY from the host's content (content.json or page sections), always shows a source link to the section, and says "I could not find this in the course" and offers a human when retrieval is below threshold. No medical, legal or immigration advice: point to a person.
+- Events to host: db-assistant:question {text, language}, db-assistant:escalated {ticketId}, db-assistant:language {language}. Use CustomEvent with bubbles:true, composed:true.
+- Privacy: collect minimum; no analytics; mic, screen share, location are OFF until user starts them, clearly indicated while on; nothing sent to third parties unless host configured it and user agreed. User can clear saved data (button).
+- Accessibility (WCAG 2.2 AA) is the core: real <button>/<a>/<input>/<label for>; no div click handlers; full keyboard use (Tab, Enter, Space, Esc, arrows in tabs); visible :focus-visible 3px outline, never outline:none; focus management (Esc closes and returns focus to launcher; dialogs via <dialog> showModal); message list role="log" aria-live="polite", each message dir="auto"; lang attribute on every text block in another language (lang="am" etc.) so screen readers switch voices; targets >=44px; contrast >=4.5:1 text, 3:1 controls; sizes in rem; works at 200% zoom and 320px width with no horizontal scroll and no fixed heights; launcher must not cover the host's controls (draggable alternatives need button equivalents); respect prefers-reduced-motion; no timers/auto-playing audio; labels not placeholders; errors in words with role="alert".
+- Ethiopian localization: Amharic complete (every string); font stack "Noto Sans Ethiopic", system fonts; line-height ~1.7 for Ethiopic; no uppercase/letter-spacing; RTL for Arabic via dir="rtl" + logical properties. Accept Amharic, Afaan Oromoo, Tigrinya, Somali, Arabic, English. Native-language names in the language picker (አማርኛ, Afaan Oromoo, ትግርኛ, Soomaali, العربية, English), each with its own lang attribute.
+- Low-cost Android + slow 3G: lazy load, no autoplay, small assets, graceful offline (offline FAQ search must work with no network; consider a tiny service worker later).
+- Write clean, commented, maintainable code with a short module README as you go. After each phase: run it, test it, then report (a) files changed, (b) what works, (c) what is stubbed or limited, (d) manual test steps for me. Do NOT start the next phase until I say so. Ask me before adding any dependency.

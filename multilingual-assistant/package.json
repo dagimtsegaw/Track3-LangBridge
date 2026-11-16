@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "axe": "node scripts/axe.mjs"
+  }
+}

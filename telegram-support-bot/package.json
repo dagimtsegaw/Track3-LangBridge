@@ -1,0 +1,22 @@
+{
+  "name": "alx-telegram-assistant",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Multilingual ALX Telegram FAQ and learning-support bot for the Digital Bridge Accessibility Hackathon.",
+  "type": "module",
+  "main": "src/bot.js",
+  "scripts": {
+    "start": "node src/bot.js",
+    "dev": "node --watch src/bot.js",
+    "test": "node --test tests/faqService.test.js tests/botFlows.test.js tests/geminiGrounded.test.js tests/speechService.test.js tests/backendApi.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "fuse.js": "^7.1.0",
+    "msedge-tts": "^2.1.1",
+    "telegraf": "^4.16.3"
+  }
+}

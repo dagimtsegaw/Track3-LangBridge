@@ -1,0 +1,40 @@
+{
+  "title": "Test listings",
+  "sections": [
+    {
+      "id": "test-job-inbox",
+      "title": "Test listing: Inbox assistant",
+      "url": "/demo/data/jobs.json#test-job-inbox",
+      "lang": "en",
+      "text": "Test listing only, not a real vacancy. A sample client wants weekday help sorting an email inbox and drafting short replies. About 10 hours a week. Remote."
+    },
+    {
+      "id": "test-job-calendar",
+      "title": "Test listing: Calendar coordinator",
+      "url": "/demo/data/jobs.json#test-job-calendar",
+      "lang": "en",
+      "text": "Test listing only, not a real vacancy. A sample team wants help keeping calendar holds across three time zones and sending reminder notes. About 8 hours a week. Remote."
+    },
+    {
+      "id": "test-job-replies",
+      "title": "Test listing: Customer reply assistant",
+      "url": "/demo/data/jobs.json#test-job-replies",
+      "lang": "en",
+      "text": "Test listing only, not a real vacancy. A sample shop wants help answering simple refund requests with a calm, clear tone. About 12 hours a week. Remote."
+    },
+    {
+      "id": "test-job-research",
+      "title": "Test listing: Research notes assistant",
+      "url": "/demo/data/jobs.json#test-job-research",
+      "lang": "en",
+      "text": "Test listing only, not a real vacancy. A sample founder wants briefing notes pulled from public pages into a shared document. About 6 hours a week. Remote."
+    },
+    {
+      "id": "test-job-social",
+      "title": "Test listing: Social media scheduler",
+      "url": "/demo/data/jobs.json#test-job-social",
+      "lang": "en",
+      "text": "Test listing only, not a real vacancy. A pretend bakery wants a weekly social media calendar and short post drafts. About 5 hours a week. Remote."
+    }
+  ]
+}

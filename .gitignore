@@ -1,0 +1,16 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# dependencies
+node_modules/
+
+# local data and logs
+*.db
+*.db-journal
+*.log
+
+# OS and editor
+.DS_Store
+Thumbs.db
