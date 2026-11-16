@@ -4,7 +4,7 @@ Node.js server for model answers, speech, translation, tickets, and SMS. Keys st
 
 ## Run
 
-From the repository root, copy `.env.example` to `.env` and fill in only the keys you have.
+From the repository root, copy `.env.example` to `.env`
 
 ```bash
 npm install --prefix api

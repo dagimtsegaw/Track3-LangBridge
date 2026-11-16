@@ -1,27 +1,14 @@
-# Module name, track, team members and co-designer
+# LangBridge, track 3, Team: Peniel Zewdu, Dagim Tsegaw, Samuel Demilew
 
 **Name:** Savanna Assistant (LangBridge). **Track:** 3, Multilingual assistant and live help.
 
 This repository has three folders. `docker-compose.yml`, `openapi.yaml`, and `CONFORMANCE.md` live in `multilingual-assistant/`, not in this root. A judge should start in that folder for the widget and the API.
 
-| Folder | What it is | Readme |
-| --- | --- | --- |
+| Folder                    | What it is                              | Readme                                                               |
+| ------------------------- | --------------------------------------- | -------------------------------------------------------------------- |
 | `multilingual-assistant/` | Widget, API, Savanna pages, helper desk | [multilingual-assistant/README.md](multilingual-assistant/README.md) |
-| `telegram-support-bot/` | Course and person bot, @alxtestsbot | [telegram-support-bot/README.md](telegram-support-bot/README.md) |
-| `telegram-jobs-bot/` | Job-alert bot, @alxjobsbot | [telegram-jobs-bot/README.md](telegram-jobs-bot/README.md) |
-
-**Team members (fill in):**
-
-| Name | Phone |
-| --- | --- |
-| FILL IN | FILL IN |
-| FILL IN | FILL IN |
-
-**Co-designer (fill in):** FILL IN. Phone: FILL IN.
-
-**Live demo URL (fill in):** FILL IN.
-
-**Licence confirmation (fill in):** The file [multilingual-assistant/LICENSE](multilingual-assistant/LICENSE) is MIT. Whether that is the open licence named at kick-off: **Not verified.** FILL IN after asking the mentor.
+| `telegram-support-bot/`   | Course and person bot, @alxtestsbot     | [telegram-support-bot/README.md](telegram-support-bot/README.md)     |
+| `telegram-jobs-bot/`      | Job-alert bot, @alxjobsbot              | [telegram-jobs-bot/README.md](telegram-jobs-bot/README.md)           |
 
 ## What it does
 
@@ -108,21 +95,21 @@ The tracked `.env.example` currently has a nonempty `HELPER_TOKEN`, and it match
 
 Variables the API reads, and what may stay empty:
 
-| Variable | Empty is OK? | Effect |
-| --- | --- | --- |
-| `PORT` | Yes | Default 3000. Compose sets 3000. |
-| `AI_PROVIDER` | Yes | Unset or anything other than `gemini` or `ollama` means keyword answers. Compose default is `none`. |
-| `GEMINI_API_KEY` | Yes | Empty keeps Gemini off. |
-| `GEMINI_MODEL` | Yes | Default `gemini-3.5-flash` when a key is set. |
-| `GEMINI_TTS_MODEL` | Yes | Default `gemini-2.5-flash-preview-tts`. |
-| `TTS_PROVIDER` | Yes | `none` (default), `addis`, or `mock`. `mock` is a silent WAV for Amharic, Oromo, Tigrinya, and Somali. |
-| `ADDIS_API_KEY` | Yes | Empty keeps Addis off. |
-| `ADDIS_BASE_URL` | Yes | Default `https://api.addisassistant.com`. |
-| `OLLAMA_BASE_URL` | Yes | Needed only with `AI_PROVIDER=ollama`. |
-| `OLLAMA_MODEL` | Yes | Needed only with `AI_PROVIDER=ollama`. |
-| `HELPER_TOKEN` | Yes for creating tickets | Empty makes the helper list and PATCH return 503. |
-| `TELEGRAM_BOT_USERNAME` | Yes | Empty health field. The widget then falls back to `alxjobsbot`. |
-| `ALLOWED_ORIGINS` | Yes on the same origin | Compose default `http://localhost:8080`. Another site must be listed. |
+| Variable                | Empty is OK?             | Effect                                                                                                 |
+| ----------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `PORT`                  | Yes                      | Default 3000. Compose sets 3000.                                                                       |
+| `AI_PROVIDER`           | Yes                      | Unset or anything other than `gemini` or `ollama` means keyword answers. Compose default is `none`.    |
+| `GEMINI_API_KEY`        | Yes                      | Empty keeps Gemini off.                                                                                |
+| `GEMINI_MODEL`          | Yes                      | Default `gemini-3.5-flash` when a key is set.                                                          |
+| `GEMINI_TTS_MODEL`      | Yes                      | Default `gemini-2.5-flash-preview-tts`.                                                                |
+| `TTS_PROVIDER`          | Yes                      | `none` (default), `addis`, or `mock`. `mock` is a silent WAV for Amharic, Oromo, Tigrinya, and Somali. |
+| `ADDIS_API_KEY`         | Yes                      | Empty keeps Addis off.                                                                                 |
+| `ADDIS_BASE_URL`        | Yes                      | Default `https://api.addisassistant.com`.                                                              |
+| `OLLAMA_BASE_URL`       | Yes                      | Needed only with `AI_PROVIDER=ollama`.                                                                 |
+| `OLLAMA_MODEL`          | Yes                      | Needed only with `AI_PROVIDER=ollama`.                                                                 |
+| `HELPER_TOKEN`          | Yes for creating tickets | Empty makes the helper list and PATCH return 503.                                                      |
+| `TELEGRAM_BOT_USERNAME` | Yes                      | Empty health field. The widget then falls back to `alxjobsbot`.                                        |
+| `ALLOWED_ORIGINS`       | Yes on the same origin   | Compose default `http://localhost:8080`. Another site must be listed.                                  |
 
 `.env.example` does not list `PORT`, `AI_PROVIDER`, `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_TTS_MODEL`, `TTS_PROVIDER`, `ADDIS_API_KEY`, `ADDIS_BASE_URL`, or `ALLOWED_ORIGINS`. Those names are in `api/lib/config.js` and `docker-compose.yml`. Add them to your `.env` if you need them. This pass did not edit `.env.example`.
 
@@ -157,10 +144,10 @@ Set `BOT_TOKEN` in the jobs bot `.env`. Leave `ADDIS_API_KEY` empty if you do no
 
 ### Telegram
 
-| Bot | Username | What it does | Calls this API? | Reads `lang_topic`? |
-| --- | --- | --- | --- | --- |
-| Support | @alxtestsbot | Course answers, a person, on-demand `/alerts` | Yes, when `BACKEND_API_BASE_URL` is set | Yes |
-| Jobs | @alxjobsbot | Scrapes six boards and pushes new jobs | No | No |
+| Bot     | Username     | What it does                                  | Calls this API?                         | Reads `lang_topic`? |
+| ------- | ------------ | --------------------------------------------- | --------------------------------------- | ------------------- |
+| Support | @alxtestsbot | Course answers, a person, on-demand `/alerts` | Yes, when `BACKEND_API_BASE_URL` is set | Yes                 |
+| Jobs    | @alxjobsbot  | Scrapes six boards and pushes new jobs        | No                                      | No                  |
 
 The widget link is `https://t.me/<username>?start=<lang>_<topic>`.
 
@@ -200,14 +187,14 @@ On a page served by this Compose file:
 
 That is the only tag the Savanna pages and `demo/blank.html` add.
 
-| Attribute | Default | Meaning |
-| --- | --- | --- |
-| `data-lang` | `auto` if any mount attribute is present and this one is missing | `auto`, or a code in `module/i18n/languages.json` (`en`, `am`, `om`, `ti`, `so`, `ar`). `auto` uses `localStorage` `db-assistant:lang`, then `navigator.languages`, then `en`. A specific code beats the saved choice. |
-| `data-api` | empty | Base for `/v1/...`. Empty means no health, no model, no tickets, no cloud speech, no page translation. `/api` is joined to the **page** origin, not the script host. Use a full `https://` URL when the API is elsewhere. |
-| `data-content` | empty | Lesson JSON. Empty, or a failed fetch, scrapes `h1`–`h3` in `<main>`. |
-| `data-provider` | empty | Empty or `auto` with `data-api` set: health decides. `ai: true` uses the API. `ai: false` or a failed health stays on keyword search. `none` forces keyword search. `cloud` forces the API client, which still falls back if the call fails. |
-| `data-theme` | empty | Copied onto the element and not read again. |
-| `data-telegram` | empty | Public bot username. Overrides the health field when it is valid. |
+| Attribute       | Default                                                          | Meaning                                                                                                                                                                                                                                      |
+| --------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data-lang`     | `auto` if any mount attribute is present and this one is missing | `auto`, or a code in `module/i18n/languages.json` (`en`, `am`, `om`, `ti`, `so`, `ar`). `auto` uses `localStorage` `db-assistant:lang`, then `navigator.languages`, then `en`. A specific code beats the saved choice.                       |
+| `data-api`      | empty                                                            | Base for `/v1/...`. Empty means no health, no model, no tickets, no cloud speech, no page translation. `/api` is joined to the **page** origin, not the script host. Use a full `https://` URL when the API is elsewhere.                    |
+| `data-content`  | empty                                                            | Lesson JSON. Empty, or a failed fetch, scrapes `h1`–`h3` in `<main>`.                                                                                                                                                                        |
+| `data-provider` | empty                                                            | Empty or `auto` with `data-api` set: health decides. `ai: true` uses the API. `ai: false` or a failed health stays on keyword search. `none` forces keyword search. `cloud` forces the API client, which still falls back if the call fails. |
+| `data-theme`    | empty                                                            | Copied onto the element and not read again.                                                                                                                                                                                                  |
+| `data-telegram` | empty                                                            | Public bot username. Overrides the health field when it is valid.                                                                                                                                                                            |
 
 You can place the element yourself. Do not also put mount `data-*` attributes on the script, or the script may add a second element. If an element is already on the page, auto-mount leaves it alone.
 
@@ -225,10 +212,10 @@ You can place the element yourself. Do not also put mount `data-*` attributes on
 
 Events use `bubbles: true` and `composed: true`, so a listener on `document` hears them from the shadow tree.
 
-| Event | `detail` |
-| --- | --- |
-| `db-assistant:question` | `{ text, language }` when the learner sends a question |
-| `db-assistant:language` | `{ language }` after strings load |
+| Event                    | `detail`                                                                                                                                             |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db-assistant:question`  | `{ text, language }` when the learner sends a question                                                                                               |
+| `db-assistant:language`  | `{ language }` after strings load                                                                                                                    |
 | `db-assistant:escalated` | `{ ticketId }` after the server accepts a ticket, including a queued ticket sent later. It does not fire when the ticket is only saved on the phone. |
 
 ```html
@@ -362,14 +349,14 @@ LTI 1.3 was not attempted. A real connection would be: the school platform start
 
 Six languages, from `module/i18n/languages.json`:
 
-| Code | Name | Direction | Speech tag | Addis id |
-| --- | --- | --- | --- | --- |
-| `en` | English | ltr | `en-US` | `none` |
-| `am` | አማርኛ | ltr | `am-ET` | `am-hamen` |
-| `om` | Afaan Oromoo | ltr | `om-ET` | `om-bikila` |
-| `ti` | ትግርኛ | ltr | `ti-ET` | `ti-berhane` |
-| `so` | Soomaali | ltr | `so-SO` | `catalog` (no default voice id) |
-| `ar` | العربية | rtl | `ar-SA` | `none` |
+| Code | Name         | Direction | Speech tag | Addis id                        |
+| ---- | ------------ | --------- | ---------- | ------------------------------- |
+| `en` | English      | ltr       | `en-US`    | `none`                          |
+| `am` | አማርኛ         | ltr       | `am-ET`    | `am-hamen`                      |
+| `om` | Afaan Oromoo | ltr       | `om-ET`    | `om-bikila`                     |
+| `ti` | ትግርኛ         | ltr       | `ti-ET`    | `ti-berhane`                    |
+| `so` | Soomaali     | ltr       | `so-SO`    | `catalog` (no default voice id) |
+| `ar` | العربية      | rtl       | `ar-SA`    | `none`                          |
 
 Arabic is the only `dir: "rtl"`. The widget sets `dir` from the language file. The test `language names, codes, and Arabic direction` passed. A person has not checked the visual layout.
 
@@ -390,47 +377,47 @@ Each of the six language files has 39 command ids and 71 phrases. The catalog te
 
 English phrases:
 
-| Id | Phrases |
-| --- | --- |
-| `open` | open assistant; open the assistant |
-| `close` | close assistant; close the assistant |
-| `openA11y` | open accessibility; accessibility tools |
-| `closeA11y` | close accessibility; hide accessibility |
-| `readPage` | read this page; read the page |
-| `readSelected` | read selected; read the selection |
-| `stopReading` | stop reading; stop speaking |
-| `scrollDown` | scroll down |
-| `scrollUp` | scroll up |
-| `scrollTop` | go to the top; scroll to the top |
-| `scrollBottom` | go to the bottom; scroll to the bottom |
-| `goToSection` | go to section |
-| `nextHeading` | next heading |
-| `previousHeading` | previous heading |
-| `textBigger` | make text bigger; bigger text |
-| `textSmaller` | make text smaller; smaller text |
-| `textReset` | reset text size; normal text size |
-| `spacingMore` | more line spacing; increase spacing |
-| `spacingLess` | less line spacing; decrease spacing |
-| `contrastOn` | high contrast on |
-| `contrastOff` | high contrast off |
-| `dyslexiaOn` | dyslexia font on; readable font on |
-| `dyslexiaOff` | dyslexia font off; readable font off |
-| `cursorOn` | big cursor; large cursor; cursor on |
-| `cursorOff` | small cursor; normal cursor; cursor off |
-| `linksOn` | highlight links; show links |
-| `linksOff` | highlight links off; stop highlighting links |
-| `hoverOn` | read on hover; hover reading on |
-| `hoverOff` | read on hover off; hover reading off |
-| `resetAll` | reset all; reset settings |
-| `changeLanguage` | change language to |
-| `suggestLanguage` | suggest a language; language for my area |
-| `shareScreen` | share my screen; share screen |
-| `stopSharing` | stop sharing; stop share |
-| `talkPerson` | talk to a person |
-| `stopListening` | stop listening; voice commands off |
-| `goBack` | go back; previous page |
-| `reload` | reload page; refresh page |
-| `help` | help; list commands |
+| Id                | Phrases                                      |
+| ----------------- | -------------------------------------------- |
+| `open`            | open assistant; open the assistant           |
+| `close`           | close assistant; close the assistant         |
+| `openA11y`        | open accessibility; accessibility tools      |
+| `closeA11y`       | close accessibility; hide accessibility      |
+| `readPage`        | read this page; read the page                |
+| `readSelected`    | read selected; read the selection            |
+| `stopReading`     | stop reading; stop speaking                  |
+| `scrollDown`      | scroll down                                  |
+| `scrollUp`        | scroll up                                    |
+| `scrollTop`       | go to the top; scroll to the top             |
+| `scrollBottom`    | go to the bottom; scroll to the bottom       |
+| `goToSection`     | go to section                                |
+| `nextHeading`     | next heading                                 |
+| `previousHeading` | previous heading                             |
+| `textBigger`      | make text bigger; bigger text                |
+| `textSmaller`     | make text smaller; smaller text              |
+| `textReset`       | reset text size; normal text size            |
+| `spacingMore`     | more line spacing; increase spacing          |
+| `spacingLess`     | less line spacing; decrease spacing          |
+| `contrastOn`      | high contrast on                             |
+| `contrastOff`     | high contrast off                            |
+| `dyslexiaOn`      | dyslexia font on; readable font on           |
+| `dyslexiaOff`     | dyslexia font off; readable font off         |
+| `cursorOn`        | big cursor; large cursor; cursor on          |
+| `cursorOff`       | small cursor; normal cursor; cursor off      |
+| `linksOn`         | highlight links; show links                  |
+| `linksOff`        | highlight links off; stop highlighting links |
+| `hoverOn`         | read on hover; hover reading on              |
+| `hoverOff`        | read on hover off; hover reading off         |
+| `resetAll`        | reset all; reset settings                    |
+| `changeLanguage`  | change language to                           |
+| `suggestLanguage` | suggest a language; language for my area     |
+| `shareScreen`     | share my screen; share screen                |
+| `stopSharing`     | stop sharing; stop share                     |
+| `talkPerson`      | talk to a person                             |
+| `stopListening`   | stop listening; voice commands off           |
+| `goBack`          | go back; previous page                       |
+| `reload`          | reload page; refresh page                    |
+| `help`            | help; list commands                          |
 
 The other languages use their own phrases in `module/i18n/<code>.json` under `commands`. Speech recognition in the widget uses Chrome's `SpeechRecognition` or `webkitSpeechRecognition`. Other browsers may have no recognizer.
 
@@ -446,16 +433,16 @@ There is no service worker in `module/` or `api/`. A closed tab does not keep an
 
 Sizes measured on 16 Nov 2026 with Node `zlib.gzipSync` at the default level (6). `nginx.conf` has no `gzip` directive, so a browser that loads through this Compose file receives the raw bytes.
 
-| File | Raw bytes | Gzip bytes |
-| --- | --- | --- |
-| `module/db-assistant.js` | 288959 | 57202 |
-| `module/i18n/languages.json` | 586 | 253 |
-| `module/i18n/en.json` | 18448 | 5435 |
-| `module/api-url.js` | 711 | 392 |
-| `demo/content.json` | 8862 | 3383 |
-| `demo/data/jobs.json` | 1814 | 521 |
-| `demo/data/alx-knowledge.json` | 74045 | 19453 |
-| **English first load, sum** | **393425** | **86639** (sum of per-file gzip) |
+| File                           | Raw bytes  | Gzip bytes                       |
+| ------------------------------ | ---------- | -------------------------------- |
+| `module/db-assistant.js`       | 288959     | 57202                            |
+| `module/i18n/languages.json`   | 586        | 253                              |
+| `module/i18n/en.json`          | 18448      | 5435                             |
+| `module/api-url.js`            | 711        | 392                              |
+| `demo/content.json`            | 8862       | 3383                             |
+| `demo/data/jobs.json`          | 1814       | 521                              |
+| `demo/data/alx-knowledge.json` | 74045      | 19453                            |
+| **English first load, sum**    | **393425** | **86639** (sum of per-file gzip) |
 
 That set is what the English blank page requests before the learner types, when `data-api` is set and health says `ai` is false: the script, the language list, English strings, `api-url.js` for the health check, the content file, `jobs.json` from its `sources`, and `alx-knowledge.json`. `cloud.js` (2636 raw, 970 gzip) loads on startup only when health says `ai` is true. `none.js` loads on the first question. The raw sum is under 500 KB. The wire size through this nginx is the raw sum.
 
@@ -465,42 +452,42 @@ That set is what the English blank page requests before the learner types, when 
 
 On the phone, keys start with `db-assistant:`:
 
-| Store | Key | What |
-| --- | --- | --- |
-| `localStorage` | `db-assistant:lang` | Language code |
-| `localStorage` | `db-assistant:tz-dismiss` | `1` if the Addis time-zone offer was declined |
-| `localStorage` | `db-assistant:commands` | `1` if the command switch was on. The mic still starts only after the next press. |
-| `localStorage` | `db-assistant:a11y` | Contrast, text size, dyslexia font, spacing, hover, cursor, links |
-| `localStorage` | `db-assistant:outbox` | Unsent tickets, including the conversation and page URL. Last 20. |
-| `localStorage` | `db-assistant:share` | `1` if the share toggle was on. Capture does not start from this flag. |
-| `sessionStorage` | `db-assistant:tr:...` | Page-translation cache |
+| Store            | Key                       | What                                                                              |
+| ---------------- | ------------------------- | --------------------------------------------------------------------------------- |
+| `localStorage`   | `db-assistant:lang`       | Language code                                                                     |
+| `localStorage`   | `db-assistant:tz-dismiss` | `1` if the Addis time-zone offer was declined                                     |
+| `localStorage`   | `db-assistant:commands`   | `1` if the command switch was on. The mic still starts only after the next press. |
+| `localStorage`   | `db-assistant:a11y`       | Contrast, text size, dyslexia font, spacing, hover, cursor, links                 |
+| `localStorage`   | `db-assistant:outbox`     | Unsent tickets, including the conversation and page URL. Last 20.                 |
+| `localStorage`   | `db-assistant:share`      | `1` if the share toggle was on. Capture does not start from this flag.            |
+| `sessionStorage` | `db-assistant:tr:...`     | Page-translation cache                                                            |
 
 **Clear my saved data** removes every `localStorage` and `sessionStorage` key that starts with `db-assistant:`. It stops the microphone and screen share and resets display tools. It does not delete tickets already stored on the server.
 
 The server stores:
 
-| What | Where | How it goes away |
-| --- | --- | --- |
-| Tickets | `api/data/escalations.json` | There is no delete route. PATCH sets `status` to `answered` and sets `answeredAt`. The object stays in the file. The waiting list hides it. To remove the file, stop the API and delete `api/data/escalations.json`. That file is gitignored. |
-| Posted course index | Memory | Process restart |
-| Webhooks | Memory, max 20 | Process restart |
-| Translation cache | Memory, max 200 | Process restart |
-| Rate-limit counters | Memory, 60 per IP per minute | The window passes |
-| Demo course | `demo/content.json`, `demo/data/jobs.json`, `demo/data/alx-knowledge.json` | Edit the files |
+| What                | Where                                                                      | How it goes away                                                                                                                                                                                                                              |
+| ------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tickets             | `api/data/escalations.json`                                                | There is no delete route. PATCH sets `status` to `answered` and sets `answeredAt`. The object stays in the file. The waiting list hides it. To remove the file, stop the API and delete `api/data/escalations.json`. That file is gitignored. |
+| Posted course index | Memory                                                                     | Process restart                                                                                                                                                                                                                               |
+| Webhooks            | Memory, max 20                                                             | Process restart                                                                                                                                                                                                                               |
+| Translation cache   | Memory, max 200                                                            | Process restart                                                                                                                                                                                                                               |
+| Rate-limit counters | Memory, 60 per IP per minute                                               | The window passes                                                                                                                                                                                                                             |
+| Demo course         | `demo/content.json`, `demo/data/jobs.json`, `demo/data/alx-knowledge.json` | Edit the files                                                                                                                                                                                                                                |
 
 What is sent, and when:
 
-| To | When | What is sent |
-| --- | --- | --- |
-| Gemini | `AI_PROVIDER=gemini` and `GEMINI_API_KEY` is set, and a section cleared the threshold | The question, the language, and those sections. The key is a header, not a browser script. |
-| Gemini | Page translation, after the learner confirms | The batch of visible strings and the target language. |
-| Gemini | Listen, when `ttsGemini` is true | The reply text. |
-| Addis AI | `TTS_PROVIDER=addis`, `ADDIS_API_KEY` set, language `am`, `om`, `ti`, or `so` | The reply text and the voice id. |
-| Telegram, from the widget | The learner opens the link | Nothing is posted by the widget. The browser opens `t.me`. |
-| Telegram, from @alxtestsbot | The learner asks for a person and `HUMAN_SUPPORT_CHAT_ID` is set | First name, username, user id, language, question, and UTC time, into that chat. The same bot also POSTs a ticket to this API when `BACKEND_API_BASE_URL` is set. |
-| Telegram, from @alxjobsbot | A subscriber is due a broadcast, or they send `/jobs` | Job title, source, and link. |
-| Google Translate | Jobs bot, when NLLB is off or fails | The English string and the target language code, to `translate.googleapis.com`. `@huggingface/transformers` is not in that bot's `package.json`, so NLLB will fail until that package is installed, and Google is the backup. |
-| Browser speech service | Dictation or commands, after the learner agrees | Audio goes to the browser's recognizer. This script does not store it. |
+| To                          | When                                                                                  | What is sent                                                                                                                                                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gemini                      | `AI_PROVIDER=gemini` and `GEMINI_API_KEY` is set, and a section cleared the threshold | The question, the language, and those sections. The key is a header, not a browser script.                                                                                                                                    |
+| Gemini                      | Page translation, after the learner confirms                                          | The batch of visible strings and the target language.                                                                                                                                                                         |
+| Gemini                      | Listen, when `ttsGemini` is true                                                      | The reply text.                                                                                                                                                                                                               |
+| Addis AI                    | `TTS_PROVIDER=addis`, `ADDIS_API_KEY` set, language `am`, `om`, `ti`, or `so`         | The reply text and the voice id.                                                                                                                                                                                              |
+| Telegram, from the widget   | The learner opens the link                                                            | Nothing is posted by the widget. The browser opens `t.me`.                                                                                                                                                                    |
+| Telegram, from @alxtestsbot | The learner asks for a person and `HUMAN_SUPPORT_CHAT_ID` is set                      | First name, username, user id, language, question, and UTC time, into that chat. The same bot also POSTs a ticket to this API when `BACKEND_API_BASE_URL` is set.                                                             |
+| Telegram, from @alxjobsbot  | A subscriber is due a broadcast, or they send `/jobs`                                 | Job title, source, and link.                                                                                                                                                                                                  |
+| Google Translate            | Jobs bot, when NLLB is off or fails                                                   | The English string and the target language code, to `translate.googleapis.com`. `@huggingface/transformers` is not in that bot's `package.json`, so NLLB will fail until that package is installed, and Google is the backup. |
+| Browser speech service      | Dictation or commands, after the learner agrees                                       | Audio goes to the browser's recognizer. This script does not store it.                                                                                                                                                        |
 
 Off until the learner acts: the microphone, the voice-command loop, geolocation, page translation, and `getDisplayMedia`. The first mic start asks for agreement. That agreement is kept in memory for the visit only. Geolocation runs from "Suggest a language for my area" and is not stored. Page translation runs after a confirm. Screen share runs from the share button. Hover-read, contrast, and the other display tools come back from `localStorage` without a new click.
 
@@ -516,14 +503,14 @@ Figures below are estimates, not an invoice. This pass did not open a vendor pri
 
 Assumptions: 3,000 learners in one month. About 20 questions each. About 60,000 asks. Most asks hit the lesson file. A helper reads the queue in a browser. Both bots run on the same machine as the API.
 
-| Item | Estimate | Assumption |
-| --- | --- | --- |
-| No-AI path | 0 for Gemini and Addis | `AI_PROVIDER=none`, `TTS_PROVIDER=none`, empty keys. Keyword excerpts and browser voices. |
-| Gemini | Not verified | Optional. Turn it on only if you accept the current Gemini price for the calls you make. Page translation and Gemini speech add more calls. |
-| Addis AI | Not verified | Optional speech for Amharic, Oromo, Tigrinya, and Somali. |
-| Hosting | Not verified | One small VM, or a laptop, running Compose. This demo was not priced. |
-| @alxtestsbot | 0 for the Bot API, as far as this repo states | A BotFather token. No monthly fee is coded. |
-| @alxjobsbot | 0 for the Bot API, as far as this repo states | A second token. Scraping uses your bandwidth. NLLB, if you install it, downloads a model once. Google Translate fallback is an unofficial endpoint and can stop working. |
+| Item         | Estimate                                      | Assumption                                                                                                                                                               |
+| ------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| No-AI path   | 0 for Gemini and Addis                        | `AI_PROVIDER=none`, `TTS_PROVIDER=none`, empty keys. Keyword excerpts and browser voices.                                                                                |
+| Gemini       | Not verified                                  | Optional. Turn it on only if you accept the current Gemini price for the calls you make. Page translation and Gemini speech add more calls.                              |
+| Addis AI     | Not verified                                  | Optional speech for Amharic, Oromo, Tigrinya, and Somali.                                                                                                                |
+| Hosting      | Not verified                                  | One small VM, or a laptop, running Compose. This demo was not priced.                                                                                                    |
+| @alxtestsbot | 0 for the Bot API, as far as this repo states | A BotFather token. No monthly fee is coded.                                                                                                                              |
+| @alxjobsbot  | 0 for the Bot API, as far as this repo states | A second token. Scraping uses your bandwidth. NLLB, if you install it, downloads a model once. Google Translate fallback is an unofficial endpoint and can stop working. |
 
 The free path is the one that still answers when the paid keys are empty.
 
@@ -531,44 +518,44 @@ The free path is the one that still answers when the paid keys are empty.
 
 Checked on 16 Nov 2026. Node v22.5.1. `node --test` in `multilingual-assistant`: 68 pass, 0 fail. `npm test` in `telegram-support-bot`: 40 pass, 1 fail. `npm test` in `telegram-jobs-bot`: 34 pass, 0 fail. `npm run axe` used axe-core 4.10.3 at 1280×900. Module: 0 critical and 0 serious on blank, concept, and jobs, in chat, three accessibility tabs, and Talk to a person. Host on the concept page: 1 critical and 4 serious per state (the script sums states to 5 critical and 20 serious). Blank and jobs host: 0 and 0.
 
-| Item | Status | Evidence |
-| --- | --- | --- |
-| Widget | Partial | Script, shadow UI, and axe states above. Ticket POST omits `language`, so the API stores `en`. |
-| API | Working | Routes in `api/app.js` match the OpenAPI path list. Tests cover ask, content, SMS, tickets, 404, Ollama mock, and advice. Curls were not executed. |
-| Support bot @alxtestsbot | Partial | Calls `/api/v1/ask` and `/api/v1/escalations` when `BACKEND_API_BASE_URL` is set. `npm test`: 40 pass, 1 fail. The failing test does not clear that variable, so a successful ticket shows the wait sentence instead of "not connected". |
-| Jobs bot @alxjobsbot | Partial | 34 pass. Scrapes six boards and pushes on a timer. Does not call this API, does not read `jobs.json`, and does not read `lang_topic`. |
-| Telegram push of course listings | Stub | Support `/alerts` says push is not built (test passed). Jobs push is a different, scraped feed. |
-| Screen sharing preview | Partial | Local muted video and a Stop control. No peer connection. A helper cannot see the screen. A real share prompt was not completed. |
-| Android alternative | Partial | Chrome on Android is treated as unable to share (unit test). The panel can post the page address. A phone was not used. |
-| Page translation | Partial | `page-translate.js` and `POST /api/v1/translate`. Unit tests passed. The on-screen "Experimental" lines are commented out in `db-assistant.js`. Not clicked in a browser. |
-| Advice phrase list | Working | `module/providers/advice.js`. Refused before retrieval. Sentence: "Please talk to a person." It is a phrase list, not a classifier. |
-| Ollama | Partial | `module/providers/local.js` posts to `{base}/v1/chat/completions`. Test uses a fake `fetch`. No live model. |
-| Oromo, Tigrinya, and Somali TTS | Not verified | Voice ids are in `languages.json`. Tests mock HTTP. Nobody listened. Somali has no default Addis id. |
-| Voice commands per language | Partial | 39 ids and 71 phrases in each file. Match tests passed. Not spoken. |
-| `_needsReview` translations | Partial | Counts in the languages section. Catalog tests ignore the flag. |
-| SMS | Partial | `POST /sms/inbound` is a JSON demo, capped at 160 characters. There is no phone gateway. |
-| Talk to a person dialog | Partial | Axe opened the person state with 0 module issues. Accommodation posts a ticket and does not open Telegram. Telegram is a link. A person did not complete the dialog. |
-| Co-designer, unaided | Not verified | No session is recorded. |
-| NVDA | Not verified | Not run. |
-| TalkBack | Not verified | Not run. |
-| Slow 3G | Not verified | Seconds not measured. |
-| Clean-clone `docker compose up` | Not verified | `docker compose config` exited 0 here. Another laptop was not used. |
+| Item                             | Status       | Evidence                                                                                                                                                                                                                                 |
+| -------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Widget                           | Partial      | Script, shadow UI, and axe states above. Ticket POST omits `language`, so the API stores `en`.                                                                                                                                           |
+| API                              | Working      | Routes in `api/app.js` match the OpenAPI path list. Tests cover ask, content, SMS, tickets, 404, Ollama mock, and advice. Curls were not executed.                                                                                       |
+| Support bot @alxtestsbot         | Partial      | Calls `/api/v1/ask` and `/api/v1/escalations` when `BACKEND_API_BASE_URL` is set. `npm test`: 40 pass, 1 fail. The failing test does not clear that variable, so a successful ticket shows the wait sentence instead of "not connected". |
+| Jobs bot @alxjobsbot             | Partial      | 34 pass. Scrapes six boards and pushes on a timer. Does not call this API, does not read `jobs.json`, and does not read `lang_topic`.                                                                                                    |
+| Telegram push of course listings | Stub         | Support `/alerts` says push is not built (test passed). Jobs push is a different, scraped feed.                                                                                                                                          |
+| Screen sharing preview           | Partial      | Local muted video and a Stop control. No peer connection. A helper cannot see the screen. A real share prompt was not completed.                                                                                                         |
+| Android alternative              | Partial      | Chrome on Android is treated as unable to share (unit test). The panel can post the page address. A phone was not used.                                                                                                                  |
+| Page translation                 | Partial      | `page-translate.js` and `POST /api/v1/translate`. Unit tests passed. The on-screen "Experimental" lines are commented out in `db-assistant.js`. Not clicked in a browser.                                                                |
+| Advice phrase list               | Working      | `module/providers/advice.js`. Refused before retrieval. Sentence: "Please talk to a person." It is a phrase list, not a classifier.                                                                                                      |
+| Ollama                           | Partial      | `module/providers/local.js` posts to `{base}/v1/chat/completions`. Test uses a fake `fetch`. No live model.                                                                                                                              |
+| Oromo, Tigrinya, and Somali TTS  | Not verified | Voice ids are in `languages.json`. Tests mock HTTP. Nobody listened. Somali has no default Addis id.                                                                                                                                     |
+| Voice commands per language      | Partial      | 39 ids and 71 phrases in each file. Match tests passed. Not spoken.                                                                                                                                                                      |
+| `_needsReview` translations      | Partial      | Counts in the languages section. Catalog tests ignore the flag.                                                                                                                                                                          |
+| SMS                              | Partial      | `POST /sms/inbound` is a JSON demo, capped at 160 characters. There is no phone gateway.                                                                                                                                                 |
+| Talk to a person dialog          | Partial      | Axe opened the person state with 0 module issues. Accommodation posts a ticket and does not open Telegram. Telegram is a link. A person did not complete the dialog.                                                                     |
+| Co-designer, unaided             | Not verified | No session is recorded.                                                                                                                                                                                                                  |
+| NVDA                             | Not verified | Not run.                                                                                                                                                                                                                                 |
+| TalkBack                         | Not verified | Not run.                                                                                                                                                                                                                                 |
+| Slow 3G                          | Not verified | Seconds not measured.                                                                                                                                                                                                                    |
+| Clean-clone `docker compose up`  | Not verified | `docker compose config` exited 0 here. Another laptop was not used.                                                                                                                                                                      |
 
 ## Libraries and their licences
 
 Direct dependencies, versions and `license` fields from each `package-lock.json`, read on 16 Nov 2026. The widget has no npm dependency.
 
-| Package | Version | Licence | Used by |
-| --- | --- | --- | --- |
-| express | 4.22.3 | MIT | API |
-| cors | 2.8.6 | MIT | API |
-| dotenv | 16.6.1 | BSD-2-Clause | API, both bots |
-| swagger-ui-express | 5.0.1 | MIT | API |
-| yaml | 2.9.1 | ISC | API |
-| telegraf | 4.16.3 | MIT | Both bots |
-| fuse.js | 7.5.0 | Apache-2.0 | Support bot |
-| msedge-tts | 2.1.1 | MIT | Both bots |
-| playwright | 1.65.1 | Apache-2.0 | Jobs bot |
+| Package            | Version | Licence      | Used by        |
+| ------------------ | ------- | ------------ | -------------- |
+| express            | 4.22.3  | MIT          | API            |
+| cors               | 2.8.6   | MIT          | API            |
+| dotenv             | 16.6.1  | BSD-2-Clause | API, both bots |
+| swagger-ui-express | 5.0.1   | MIT          | API            |
+| yaml               | 2.9.1   | ISC          | API            |
+| telegraf           | 4.16.3  | MIT          | Both bots      |
+| fuse.js            | 7.5.0   | Apache-2.0   | Support bot    |
+| msedge-tts         | 2.1.1   | MIT          | Both bots      |
+| playwright         | 1.65.1  | Apache-2.0   | Jobs bot       |
 
 Lockfiles also pin transitive packages: API 75, support bot 56, jobs bot 57, counting every `node_modules/` entry. Their licence fields are in the lockfiles. `@huggingface/transformers` is imported by the jobs bot at runtime and is not in its `package.json`.
 
