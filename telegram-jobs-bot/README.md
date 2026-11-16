@@ -1,5 +1,7 @@
 # Job alerts bot (@alxjobsbot)
 
+live demo: https://t.me/alxjobsbot
+
 A Telegram bot that scrapes Ethiopian job boards and sends new listings to subscribers. It does not call the Savanna Assistant API and it does not read `multilingual-assistant/demo/data/jobs.json`. Those five listings are test data for the widget. This bot's listings come from the boards below.
 
 The track overview is [../README.md](../README.md). The course bot is [../telegram-support-bot/README.md](../telegram-support-bot/README.md). Use a different BotFather token for each bot.
@@ -19,16 +21,16 @@ The track overview is [../README.md](../README.md). The course bot is [../telegr
 
 From `src/data/catalog.js`:
 
-| Command | What it does |
-| --- | --- |
-| `/start` | Subscribe and show the language list |
-| `/language` | Change language |
-| `/categories` | Choose job types |
-| `/mode` | Standard, blind, or deaf |
-| `/jobs` | Show the latest jobs now |
-| `/linkedin` | LinkedIn search links |
-| `/help` | List commands |
-| `/stop` | Unsubscribe |
+| Command       | What it does                         |
+| ------------- | ------------------------------------ |
+| `/start`      | Subscribe and show the language list |
+| `/language`   | Change language                      |
+| `/categories` | Choose job types                     |
+| `/mode`       | Standard, blind, or deaf             |
+| `/jobs`       | Show the latest jobs now             |
+| `/linkedin`   | LinkedIn search links                |
+| `/help`       | List commands                        |
+| `/stop`       | Unsubscribe                          |
 
 `/help` is registered. It is not in the `HELP` array that `setMyCommands` publishes, because that array has no `/help` row. The handler still answers `/help`.
 
@@ -61,13 +63,13 @@ telegram-jobs-bot/
 
 Playwright Firefox opens these listing pages (`src/data/catalog.js`):
 
-| Name | URL |
-| --- | --- |
-| EthioJobs | `https://ethiojobs.net/jobs` |
-| GeezJobs | `https://geezjobs.com/jobs-in-ethiopia` |
-| HaHu Jobs | `https://www.hahu.jobs/` |
-| Ezega | `https://www.ezega.com/Jobs` |
-| EmployEthiopia | `https://employethiopia.com/` |
+| Name                    | URL                                      |
+| ----------------------- | ---------------------------------------- |
+| EthioJobs               | `https://ethiojobs.net/jobs`             |
+| GeezJobs                | `https://geezjobs.com/jobs-in-ethiopia`  |
+| HaHu Jobs               | `https://www.hahu.jobs/`                 |
+| Ezega                   | `https://www.ezega.com/Jobs`             |
+| EmployEthiopia          | `https://employethiopia.com/`            |
 | Ethiopian Reporter Jobs | `https://www.ethiopianreporterjobs.com/` |
 
 Scraped titles and links are cached for 600 seconds. Tests parse saved HTML shapes. They do not open a live board. A live scrape can fail when a site changes its markup.
@@ -88,24 +90,24 @@ There is no per-user rate limit beyond that pause.
 
 SQLite file. Path: `DB_PATH`, or `bot.db` in this folder. The root `.gitignore` ignores `*.db`. A `bot.db` file was on this machine (69632 bytes). Its rows are not listed here.
 
-| Table | Columns | What |
-| --- | --- | --- |
-| `users` | `chat_id`, `lang`, `cats`, `mode` | One row per subscriber. `/stop` deletes the row. |
-| `seen` | `link` | Job URLs already broadcast. Not deleted by `/stop`. |
-| `tcache` | `lang`, `src`, `out` | Translation cache. |
+| Table    | Columns                           | What                                                |
+| -------- | --------------------------------- | --------------------------------------------------- |
+| `users`  | `chat_id`, `lang`, `cats`, `mode` | One row per subscriber. `/stop` deletes the row.    |
+| `seen`   | `link`                            | Job URLs already broadcast. Not deleted by `/stop`. |
+| `tcache` | `lang`, `src`, `out`              | Translation cache.                                  |
 
 `src/db.js` adds `lang`, `cats`, and `mode` if an older file lacks them. The test `older databases gain the language, category, and mode columns` passed.
 
 ## Environment
 
-| Name | In `.env.example` | Required? | Local `.env` on 16 Nov 2026 |
-| --- | --- | --- | --- |
-| `BOT_TOKEN` | Yes, empty | Required. The process exits if empty. | Set |
-| `ADDIS_API_KEY` | Yes, empty | Optional | Set |
-| `ADDIS_BASE_URL` | Yes, public Addis URL | Optional. Default `https://api.addisassistant.com`. | Set |
-| `TRANSLATOR` | Yes, `auto` | Optional. `google` skips the local model. | Set |
-| `NLLB_MODEL` | Yes, a public model id | Optional. Default `Xenova/nllb-200-distilled-600M`. | Set |
-| `DB_PATH` | **No. The code reads it.** | Optional. Default `bot.db` in this folder. | Absent |
+| Name             | In `.env.example`          | Required?                                           | Local `.env` on 16 Nov 2026 |
+| ---------------- | -------------------------- | --------------------------------------------------- | --------------------------- |
+| `BOT_TOKEN`      | Yes, empty                 | Required. The process exits if empty.               | Set                         |
+| `ADDIS_API_KEY`  | Yes, empty                 | Optional                                            | Set                         |
+| `ADDIS_BASE_URL` | Yes, public Addis URL      | Optional. Default `https://api.addisassistant.com`. | Set                         |
+| `TRANSLATOR`     | Yes, `auto`                | Optional. `google` skips the local model.           | Set                         |
+| `NLLB_MODEL`     | Yes, a public model id     | Optional. Default `Xenova/nllb-200-distilled-600M`. | Set                         |
+| `DB_PATH`        | **No. The code reads it.** | Optional. Default `bot.db` in this folder.          | Absent                      |
 
 Do not put the token in `.env.example`.
 

@@ -1,5 +1,7 @@
 # ALX support bot (@alxtestsbot)
 
+live demo: https://t.me/alxtestsbot
+
 A Telegram bot for course questions and a person. It is meant to run beside the Savanna Assistant API in [../multilingual-assistant](../multilingual-assistant). The track overview is [../README.md](../README.md).
 
 When `BACKEND_API_BASE_URL` is set, typed questions go to `POST /api/v1/ask` first. A failed call falls back to the local FAQ in `src/data/`. A person request posts `POST /api/v1/escalations` and, if `HUMAN_SUPPORT_CHAT_ID` is set, also sends a Telegram message to that chat.
@@ -22,16 +24,16 @@ This folder has no `.env.example`. Create `.env` yourself and do not commit it. 
 
 Published from `src/data/locales.js`:
 
-| Command | English description |
-| --- | --- |
-| `/start` | Choose your language, or apply a `lang_topic` payload |
-| `/menu` | Open the main menu |
-| `/language` | Change language |
-| `/mode` | Accessibility: voice or text |
-| `/help` | How to use this bot |
-| `/cancel` | Cancel and show the menu |
-| `/alerts` | Current job listings from the course API |
-| `/privacy` | What the bot keeps in memory |
+| Command     | English description                                   |
+| ----------- | ----------------------------------------------------- |
+| `/start`    | Choose your language, or apply a `lang_topic` payload |
+| `/menu`     | Open the main menu                                    |
+| `/language` | Change language                                       |
+| `/mode`     | Accessibility: voice or text                          |
+| `/help`     | How to use this bot                                   |
+| `/cancel`   | Cancel and show the menu                              |
+| `/alerts`   | Current job listings from the course API              |
+| `/privacy`  | What the bot keeps in memory                          |
 
 `/reply` is for ids in `ADMIN_TELEGRAM_IDS` only. The test `only configured admins can use /reply` passed.
 
@@ -60,22 +62,22 @@ There is no database file. Session state is memory and is dropped on restart.
 
 The code reads these names. "Local `.env`" is set or empty on this machine on 16 Nov 2026. Values are not printed. There is no `.env.example` in this folder.
 
-| Name | Required? | Local `.env` | Notes |
-| --- | --- | --- | --- |
-| `BOT_TOKEN` | Required | Set | Bot exits if empty. |
-| `HUMAN_SUPPORT_CHAT_ID` | Optional | Set | Empty: no staff Telegram message. A ticket can still be posted. |
-| `ADMIN_TELEGRAM_IDS` | Optional | Set | Comma-separated. Empty: nobody can `/reply`. |
-| `ALX_WEBSITE` | Optional | Set | Default `https://www.alxafrica.com/`. |
-| `ALX_ABOUT_URL` | Optional | Set | Default `https://www.alxafrica.com/about/`. |
-| `ALX_PROGRAMS_URL` | Optional | Set | Default `https://www.alxafrica.com/programmes/`. |
-| `ALX_SUPPORT_URL` | Optional | Set | Default `https://ehub.alxafrica.com/`. |
-| `ANSWER_PROVIDER` | Optional | Set | `local` or `gemini`. Anything else uses the local FAQ. Default `local`. |
-| `GEMINI_API_KEY` | Optional | Set | Used only if the course API is not used and the provider is `gemini`. |
-| `GEMINI_MODEL` | Optional | Set | Default `gemini-3.1-flash-lite`. |
-| `BACKEND_API_BASE_URL` | Optional | Set | Empty: local FAQ only. Set: `POST /api/v1/ask` first. |
-| `BACKEND_API_KEY` | Optional | Empty | Read and not sent. |
-| `ADDIS_API_KEY` | Optional | Set | Empty: Oromo and Tigrinya stay text. |
-| `ADDIS_BASE_URL` | Optional | Set | Default `https://api.addisassistant.com`. |
+| Name                    | Required? | Local `.env` | Notes                                                                   |
+| ----------------------- | --------- | ------------ | ----------------------------------------------------------------------- |
+| `BOT_TOKEN`             | Required  | Set          | Bot exits if empty.                                                     |
+| `HUMAN_SUPPORT_CHAT_ID` | Optional  | Set          | Empty: no staff Telegram message. A ticket can still be posted.         |
+| `ADMIN_TELEGRAM_IDS`    | Optional  | Set          | Comma-separated. Empty: nobody can `/reply`.                            |
+| `ALX_WEBSITE`           | Optional  | Set          | Default `https://www.alxafrica.com/`.                                   |
+| `ALX_ABOUT_URL`         | Optional  | Set          | Default `https://www.alxafrica.com/about/`.                             |
+| `ALX_PROGRAMS_URL`      | Optional  | Set          | Default `https://www.alxafrica.com/programmes/`.                        |
+| `ALX_SUPPORT_URL`       | Optional  | Set          | Default `https://ehub.alxafrica.com/`.                                  |
+| `ANSWER_PROVIDER`       | Optional  | Set          | `local` or `gemini`. Anything else uses the local FAQ. Default `local`. |
+| `GEMINI_API_KEY`        | Optional  | Set          | Used only if the course API is not used and the provider is `gemini`.   |
+| `GEMINI_MODEL`          | Optional  | Set          | Default `gemini-3.1-flash-lite`.                                        |
+| `BACKEND_API_BASE_URL`  | Optional  | Set          | Empty: local FAQ only. Set: `POST /api/v1/ask` first.                   |
+| `BACKEND_API_KEY`       | Optional  | Empty        | Read and not sent.                                                      |
+| `ADDIS_API_KEY`         | Optional  | Set          | Empty: Oromo and Tigrinya stay text.                                    |
+| `ADDIS_BASE_URL`        | Optional  | Set          | Default `https://api.addisassistant.com`.                               |
 
 ## How it calls the assistant API
 
