@@ -1,214 +1,176 @@
-# ALX Telegram learning assistant
+# ALX support bot (@alxtestsbot)
 
-Multilingual Telegram bot for ALX learners. It answers from the same ALX information as Savanna Assistant. When Gemini is configured, Gemini writes the answer from that information. If the question is outside it, the bot says it could not find an answer and can offer human help.
+A Telegram bot for course questions and a person. It is meant to run beside the Savanna Assistant API in [../multilingual-assistant](../multilingual-assistant). The track overview is [../README.md](../README.md).
 
-This bot is a separate module. It does not use a database. With `ANSWER_PROVIDER=gemini` and `GEMINI_API_KEY` set, typed questions are answered by Gemini from the FAQ and the extra ALX site pages. Button answers stay the prepared FAQ text. If Gemini is not configured, typed questions use the local FAQ match.
+When `BACKEND_API_BASE_URL` is set, typed questions go to `POST /api/v1/ask` first. A failed call falls back to the local FAQ in `src/data/`. A person request posts `POST /api/v1/escalations` and, if `HUMAN_SUPPORT_CHAT_ID` is set, also sends a Telegram message to that chat.
 
-Native speakers should review the Amharic, Afaan Oromo, Tigrinya, Somali, and Arabic text before a production deployment.
+This folder has no `.env.example`. Create `.env` yourself and do not commit it. `.gitignore` ignores `.env`.
 
-## What it does
+## Features
 
-- Asks the learner to choose one of six languages on `/start`.
-- Shows a translated main menu.
-- Browses FAQ categories and prepared questions with inline buttons.
-- Matches a typed question to the FAQ when the match is confident.
-- Says when it does not have a reliable answer, and offers human help.
-- Forwards that question to `HUMAN_SUPPORT_CHAT_ID` only after Telegram accepts the message.
-- Lets configured admin accounts reply with `/reply`.
-- After the language choice, asks whether answers should be text, text plus a voice message, or text with no audio.
-- Reads answers aloud for blind and low-vision learners. Amharic, Afaan Oromo, Tigrinya, and Somali use Addis Voices. English and Arabic use Edge TTS.
-
-Supported languages:
-
-| Code | Language |
-| --- | --- |
-| `en` | English |
-| `am` | Amharic (አማርኛ) |
-| `om` | Afaan Oromo |
-| `ti` | Tigrinya (ትግርኛ) |
-| `so` | Somali (Soomaali) |
-| `ar` | Arabic (العربية) |
-
-Arabic messages are marked for right-to-left display.
-
-## Technologies
-
-- Node.js, ES modules
-- [Telegraf](https://telegraf.js.org/) for the Telegram Bot API
-- `dotenv` for environment variables
-- `fuse.js`, together with phrase and token checks, for FAQ search
-- Node.js built-in test runner
-
-## Create a bot with BotFather
-
-1. Open Telegram and start a chat with [@BotFather](https://t.me/BotFather).
-2. Send `/newbot` and follow the prompts.
-3. Copy the token BotFather gives you. Treat it like a password.
-
-## Configure `.env`
-
-From this folder:
-
-```bash
-cp .env.example .env
-```
-
-On Windows PowerShell:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Put the token in `.env`:
-
-```env
-BOT_TOKEN=123456789:the-token-from-botfather
-```
-
-The bot reads `process.env.BOT_TOKEN`. The token is not written in source code. `.env` is listed in `.gitignore`. Do not commit it, and do not paste it into logs or chat.
-
-`ANSWER_PROVIDER=gemini` sends a typed question to Gemini together with the matching FAQ entries and site pages. The model is told to answer only from that text. If nothing matches, or Gemini says it could not find the answer, the learner sees the not-found message. Leave `GEMINI_API_KEY` empty to stay on the local FAQ. `BACKEND_API_BASE_URL` is the course API origin. The bot POSTs `/api/v1/ask` and `/api/v1/escalations`. It does not send `BACKEND_API_KEY`. If the ask call fails on the network, the local FAQ is used.
-
-### Voice
-
-`/mode` chooses how answers arrive:
-
-- Standard: text, with a Listen button
-- Blind / low vision: the same text, plus an audio message
-- Deaf / hard of hearing: text only, and no Listen button
-
-`ADDIS_API_KEY` turns on Addis Voices for Amharic (`am`), Afaan Oromo (`om`), Tigrinya (`ti`), and Somali (`so`). English and Arabic keep Edge TTS and do not need that key. If the key is empty, Amharic and Somali fall back to Edge. Afaan Oromo and Tigrinya stay as text until Addis returns audio. Voice notes sent by the learner are not transcribed. The question still has to be typed.
-
-### Optional human support chat
-
-`HUMAN_SUPPORT_CHAT_ID` is the chat that should receive unanswered questions.
-
-- For a person, use their numeric Telegram user id.
-- For a group, add the bot to the group and use the group’s numeric chat id. Group ids are negative.
-
-A person can read their id from [@userinfobot](https://t.me/userinfobot). For a group, send any message in that group, then open this URL in a browser while replacing the token:
-
-`https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates`
-
-Find `chat.id` in the JSON. Do not share that URL. It contains the bot token.
-
-If `HUMAN_SUPPORT_CHAT_ID` is empty, the bot does not pretend that a person received the question. It sends the learner to the official ALX support portal instead.
-
-### Admin replies
-
-`ADMIN_TELEGRAM_IDS` is a comma-separated list of numeric Telegram user ids:
-
-```env
-ADMIN_TELEGRAM_IDS=123456789,987654321
-```
-
-Only those accounts can use:
-
-```text
-/reply <telegram_chat_id> <message>
-```
-
-The bot delivers that message to the learner. Other users are rejected. The forwarded support message includes the learner’s first name, username when Telegram provides one, user id, selected language, question, and the time in UTC.
-
-## Install and run
-
-```bash
-cd telegram-bot
-npm install
-```
-
-Start development (restarts when files change):
-
-```bash
-npm run dev
-```
-
-Production start:
-
-```bash
-npm start
-```
-
-The process uses long polling. It checks that `BOT_TOKEN` is present before connecting. Stop it with Ctrl+C.
-
-Test:
-
-```bash
-npm test
-```
+- Six languages: `en`, `am`, `om`, `ti`, `so`, `ar`. Arabic messages are marked for right-to-left.
+- Private chats only. A group gets a short refusal.
+- Local FAQ, plus the course API when the base URL is set.
+- `/alerts` asks the course API for current listings and says automatic push is not built.
+- Talk to a person: a ticket on the API, and an optional staff chat message.
+- Listen button. English and Arabic use Edge TTS. Amharic and Somali use Addis when `ADDIS_API_KEY` is set, otherwise Edge. Oromo and Tigrinya stay text if Addis returns no audio.
+- Access modes: standard, blind (text plus voice), deaf (no audio).
+- Long polling. `bot.launch({ dropPendingUpdates: true })`. No webhook server.
+- Rate limit: 20 messages in 10 seconds per user, then a short wait.
 
 ## Commands
 
-| Command | Action |
+Published from `src/data/locales.js`:
+
+| Command | English description |
 | --- | --- |
-| `/start` | Choose a language |
+| `/start` | Choose your language, or apply a `lang_topic` payload |
 | `/menu` | Open the main menu |
-| `/language` | Choose a different language |
-| `/mode` | Text, voice, or no audio |
-| `/help` | How to use the bot |
-| `/cancel` | Stop the current step and return to the menu |
-| `/privacy` | What temporary data is held |
-| `/reply` | Staff only. Send a reply to a learner chat |
+| `/language` | Change language |
+| `/mode` | Accessibility: voice or text |
+| `/help` | How to use this bot |
+| `/cancel` | Cancel and show the menu |
+| `/alerts` | Current job listings from the course API |
+| `/privacy` | What the bot keeps in memory |
 
-Unknown commands get a short explanation. The bot is meant for a private chat.
+`/reply` is for ids in `ADMIN_TELEGRAM_IDS` only. The test `only configured admins can use /reply` passed.
 
-## How language selection works
+## Folder tree
 
-`/start` shows six inline buttons. The choice is saved on the Telegraf session and used for menus, FAQ text, errors, help, and privacy. `/language` opens the same selector. There is no database, so the choice is kept in memory only.
-
-## FAQ data
-
-FAQ entries live in `src/data/data.js`. Interface text lives in `src/data/locales.js`.
-
-Each FAQ entry has:
-
-- `id` — stable id used by inline buttons
-- `category` — `about`, `programmes`, `admission`, `learning`, `career`, or `support`
-- `question`, `keywords`, and `answer` — one value for each language code
-- `sourceUrl` — official ALX page the answer is based on
-
-Facts are limited to what ALX publishes on:
-
-- https://www.alxafrica.com/about/
-- https://www.alxafrica.com/programmes/
-- the linked programme pages
-- https://ehub.alxafrica.com/
-
-The bot does not state tuition, scholarship amounts, eligibility rules, opening dates, or a promise of admission, employment, or income. If a question is not in the FAQ, the result is `not_found`.
-
-### Add a FAQ entry
-
-1. Add an object to `faqEntries` in `src/data/data.js`.
-2. Fill `question`, `keywords`, and `answer` for `en`, `am`, `om`, `ti`, `so`, and `ar`.
-3. Keep the answer to the same facts in every language. Add a real `sourceUrl`.
-4. Use specific keywords. Avoid single generic words such as `alx`, `career`, or `support`.
-5. Run `npm test`.
-
-Matching lives in `src/services/faqService.js`. It normalizes text, prefers an exact question or a distinctive phrase, and uses Fuse.js only as a strict extra signal. A weak or tied match returns `not_found`.
-
-## Answer provider
-
-Handlers ask `src/services/answerService.js` for an answer. They do not read `data.js` themselves.
-
-With Gemini configured, a typed question returns:
-
-```js
-{ status: 'answered', answer: '...', sourceUrl: 'https://...' }
+```
+telegram-support-bot/
+  package.json          telegraf, dotenv, fuse.js, msedge-tts
+  package-lock.json
+  .gitignore            ignores .env
+  src/bot.js            Telegraf, session, polling
+  src/config.js         env names
+  src/data/locales.js   six languages
+  src/data/data.js      FAQ entries
+  src/data/siteKnowledge.json
+  src/handlers/         start, menu, FAQ, language, human, messages
+  src/keyboards/
+  src/services/         answer, FAQ, speech, escalation
+  src/utils/            rate limit, redacted logs
+  tests/                node:test files
 ```
 
-or, when the information does not contain the answer:
+There is no database file. Session state is memory and is dropped on restart.
 
-```js
-{ status: 'not_found', answer: null, sourceUrl: null }
+## Environment
+
+The code reads these names. "Local `.env`" is set or empty on this machine on 16 Nov 2026. Values are not printed. There is no `.env.example` in this folder.
+
+| Name | Required? | Local `.env` | Notes |
+| --- | --- | --- | --- |
+| `BOT_TOKEN` | Required | Set | Bot exits if empty. |
+| `HUMAN_SUPPORT_CHAT_ID` | Optional | Set | Empty: no staff Telegram message. A ticket can still be posted. |
+| `ADMIN_TELEGRAM_IDS` | Optional | Set | Comma-separated. Empty: nobody can `/reply`. |
+| `ALX_WEBSITE` | Optional | Set | Default `https://www.alxafrica.com/`. |
+| `ALX_ABOUT_URL` | Optional | Set | Default `https://www.alxafrica.com/about/`. |
+| `ALX_PROGRAMS_URL` | Optional | Set | Default `https://www.alxafrica.com/programmes/`. |
+| `ALX_SUPPORT_URL` | Optional | Set | Default `https://ehub.alxafrica.com/`. |
+| `ANSWER_PROVIDER` | Optional | Set | `local` or `gemini`. Anything else uses the local FAQ. Default `local`. |
+| `GEMINI_API_KEY` | Optional | Set | Used only if the course API is not used and the provider is `gemini`. |
+| `GEMINI_MODEL` | Optional | Set | Default `gemini-3.1-flash-lite`. |
+| `BACKEND_API_BASE_URL` | Optional | Set | Empty: local FAQ only. Set: `POST /api/v1/ask` first. |
+| `BACKEND_API_KEY` | Optional | Empty | Read and not sent. |
+| `ADDIS_API_KEY` | Optional | Set | Empty: Oromo and Tigrinya stay text. |
+| `ADDIS_BASE_URL` | Optional | Set | Default `https://api.addisassistant.com`. |
+
+## How it calls the assistant API
+
+Base: `BACKEND_API_BASE_URL` with trailing slashes removed. Timeout: 10 seconds. Header: `content-type: application/json` only.
+
+Ask:
+
+```http
+POST {BACKEND_API_BASE_URL}/api/v1/ask
+{ "question": "...", "language": "am" }
 ```
 
-Without a Gemini key, the same function uses the local FAQ match and returns that same shape.
+`language` is the session language. `sections` is not sent, so the API searches the course loaded on the server. `BACKEND_API_KEY` is not sent. The test `getAnswer posts to the course API and does not send the API key` passed.
 
-## Current limitations
+- `mode: "advice"` becomes a refusal. The learner is pointed at a person.
+- A non-empty `answer` is shown, with the first source URL if present.
+- `answer: null` stays not found. The local FAQ is not used for that result.
+- A throw, a timeout, or a non-200 status uses the local FAQ if fallback is on.
 
-- Language, the current step, and the last unanswered question are stored in memory. They are lost when the process restarts.
-- There is no database and no learner history.
-- Human forwarding works only when `HUMAN_SUPPORT_CHAT_ID` is set, and only after Telegram accepts the message. That is not the same as an ALX representative receiving it in eHub.
-- Admin replies are also in memory: the learner’s language is remembered only until the process restarts.
-- Translations are an initial draft for review.
-- The bot is not the official ALX helpdesk and cannot submit an application.
+Ticket:
+
+```http
+POST {BACKEND_API_BASE_URL}/api/v1/escalations
+{ "language": "am", "topic": "tutor", "conversation": [{ "role": "learner", "text": "..." }] }
+```
+
+`topic` must be `tutor`, `careers`, `alerts`, or `accommodation`. Anything else is sent as `tutor`. No `page` and no `context`. Creating a ticket does not send the helper token.
+
+If the API base is empty, no ticket is posted. If the staff chat is also empty, the learner is told live support is not connected and is given `ALX_SUPPORT_URL`. If the API base is set and the post succeeds, the learner sees "A tutor will answer. It may take until morning." even when the staff chat is empty. That is why `npm test` fails one test on a machine whose `.env` sets `BACKEND_API_BASE_URL`. The test `human escalation explains the gap when no support chat is configured` does not clear that variable. It expects `/not connected/i`. The reply is the wait sentence. 40 other tests passed.
+
+The local FAQ fallback does not use the widget's advice phrase list. The API path does.
+
+## Start payload
+
+`/start` with no payload opens the language picker.
+
+A payload that matches `^(en|am|om|ti|so|ar)_(tutor|careers|alerts|accommodation)$` sets `session.language` and `session.topic` and opens the main menu. `accommodation` also starts a person request, with the accommodation sentence for that language. The test `a start payload opens the main menu and accommodation opens a ticket` passed.
+
+The widget builds the same shape. With the API `.env` in this checkout, health names `alxtestsbot`, so the widget link opens this bot. See [../README.md](../README.md).
+
+## Languages and voice
+
+UI strings are in `src/data/locales.js`. FAQ answers are in `src/data/data.js`, with a field per language. The test `every FAQ has the same verified facts in all six languages` passed.
+
+Voice is Edge (`msedge-tts`) or Addis. Tests mock the HTTP calls. This pass did not play a voice note in Telegram. Oromo and Tigrinya have no Edge voice, so they stay silent when Addis has no audio. The text is still sent. The test `Oromo stays silent when Addis has no audio, and Somali falls back to Edge` passed.
+
+The bot does not accept a voice message from the learner. The locale string says to type.
+
+## Tests
+
+```bash
+cd telegram-support-bot
+npm install
+npm test
+```
+
+On 16 Nov 2026, Node v22.5.1: 40 pass, 1 fail, 0 skipped. One `punycode` deprecation from a dependency. The failure is the staff-chat test described above. It can also post a real ticket if the API is up and `BACKEND_API_BASE_URL` points at it.
+
+## Run beside the API
+
+Terminal A, from `multilingual-assistant`:
+
+```bash
+docker compose up --build
+```
+
+Terminal B:
+
+```bash
+cd telegram-support-bot
+npm install
+npm start
+```
+
+Put `BOT_TOKEN` in `.env`. For course answers from the shared index:
+
+```bash
+BACKEND_API_BASE_URL=http://localhost:3000
+```
+
+Leave `GEMINI_API_KEY` and `ADDIS_API_KEY` empty if you want the local FAQ and Edge only. Oromo and Tigrinya will stay text.
+
+Do not use the jobs bot's token here.
+
+## Token safety
+
+`BOT_TOKEN` belongs only in `.env`. `.env` is gitignored. `src/utils/safeLog.js` redacts `BOT_TOKEN`, `GEMINI_API_KEY`, `ADDIS_API_KEY`, and `BACKEND_API_KEY` in error text. If a token was pasted into a chat, a commit, or a screenshot, revoke it in BotFather with `/revoke` and put the new token only in `.env`. This README does not contain a token.
+
+## Limits
+
+- `npm test` is not fully green while `BACKEND_API_BASE_URL` is set.
+- Push job alerts are not built. `/alerts` is on demand.
+- The local FAQ path does not apply the advice phrase list.
+- Session data is lost on restart.
+- Group chats are refused.
+- Voice input from the learner is refused.
+- Oromo and Tigrinya audio need a working Addis key. Tests do not prove a live voice.
+- `BACKEND_API_KEY` is unused.

@@ -1,81 +1,195 @@
 # Savanna Assistant
 
-One script tag adds a multilingual help widget to a page. This repository is the ALX Digital Bridge Accessibility Hackathon 2026 module (Track 3). Phase 2 adds an API. When no model is configured, answers still come from the lesson text in the browser.
+One script a course page can add. It searches that page's lesson, shows the section it used, speaks the reply when a voice exists, and can leave a ticket for a person. The API in `api/` is the server for model answers, speech, translation, tickets, and a short SMS demo. Keys stay on the server.
 
-## Run
+This folder also has the frozen Savanna starter under `savanna/`. The widget is the script tag at the bottom of those pages. It is not part of the starter's own JavaScript.
 
-Docker serves the Savanna pages, the module, and the blank demo on port 8080, and the API on port 3000. Copy `.env.example` to `.env` before the first run. With the example values, no model is called.
+Submission files that the guide names at the repository root live here instead: `docker-compose.yml`, `openapi.yaml`, and `CONFORMANCE.md`. The track README is [../README.md](../README.md).
+
+## Folder tree
+
+`node_modules` is omitted. `savanna/assets/` is the starter: 161 files. They are not listed one by one.
+
+```
+multilingual-assistant/
+  .env.example          example env; HELPER_TOKEN is nonempty today; do not copy secrets into git
+  .gitignore            ignores .env and api/data/*.json
+  CONFORMANCE.md        WCAG notes for the widget
+  CONTRIBUTING.md       how to change the module
+  LICENSE               MIT
+  Makefile              make serve runs docker compose up
+  README.md             this file
+  docker-compose.yml    nginx on 8080, API on 3000
+  nginx.conf            proxies /api /sms /docs /helper /openapi.yaml; no gzip directive
+  openapi.yaml          OpenAPI 3.0.3 for the API
+  package.json          npm run axe; no runtime dependencies
+  api/
+    Dockerfile          node:22-alpine
+    README.md           API run notes and limits
+    api.test.js         route tests
+    app.js              Express routes
+    package.json        express, cors, dotenv, swagger-ui-express, yaml
+    package-lock.json
+    server.js           loads ../.env and listens
+    data/               escalations.json is local and gitignored
+    lib/                config, course, gemini, addis, retrieve, tickets, phone, sms, limit, social
+    public/helper.html  helper desk
+  demo/
+    blank.html          page with no Bootstrap, plus the script
+    content.json        lesson sections; sources jobs.json
+    data/jobs.json      five test listings
+    data/alx-knowledge.json  ALX FAQ and site pages used as extra sections
+    extract-content.js  rebuilds content.json from the concept page
+    build-alx-knowledge.js
+    *.test.js
+  docs/
+    ARCHITECTURE.md
+    TESTING.md
+    FINAL_CHECK.md      historical check; do not treat as current if it disagrees with the code
+    PROJECT_OVERVIEW.md historical
+    TRACK3_CHECKLIST.md historical
+  module/
+    db-assistant.js     the script a host loads
+    api-url.js          joins data-api to /v1
+    help-link.js        Telegram URL and Android screen-share check
+    page-translate.js   collect, send, restore host text
+    calendar.js         Ethiopian calendar for am, ti, om
+    regions.js          nearest-town language; does not store the position
+    voice-match.js      command phrases
+    i18n/               languages.json and en, am, om, ti, so, ar
+    providers/          none, cloud, local (Ollama), advice, speech-browser, speech-cloud
+    data/regions.json   34 towns; coordinates are marked approximate
+    assets/.gitkeep
+  savanna/              frozen starter plus jobs.html
+    pages/concept-with-navigation.html
+    pages/jobs.html     five JobPosting blocks
+    pages/homepage-v1-paced.html
+    pages/homepage-v1-self-paced.html
+    assets/             161 starter files
+  scripts/axe.mjs       downloads axe-core 4.10.3 and scans the widget
+```
+
+## How it works
+
+**Startup.** The script defines `<db-assistant>` and, if the script tag has a mount `data-*` attribute, appends one element. It loads `i18n/languages.json` and `i18n/<code>.json`. English does not also fetch another language file. The shell stays hidden if English strings cannot be loaded. It then fetches `data-content`, any `sources` in that file, and `/demo/data/alx-knowledge.json`. If `data-api` is set and the provider is empty or `auto`, it calls `GET {api}/v1/health`. `ai: true` selects the cloud client. Otherwise it stays on keyword search.
+
+**A question.** Empty input shows "Type a question first." Advice phrases are refused before search, with "Please talk to a person." Otherwise sections are scored in `providers/none.js`. The threshold is 0.5. A miss shows "I could not find this in the course." A hit shows an excerpt, or the model text, plus a Sources list. The API does the same scoring and does not call the model when nothing clears the threshold. A model error returns the excerpt with `mode: "offline-fallback"`.
+
+**Voice.** Nothing speaks on load. Each assistant message has Listen and Stop. Amharic, Oromo, Tigrinya, and Somali try Addis when health says so, then Gemini if Addis returns 501, then a matching browser voice. English and Arabic try Gemini speech, then the browser. The microphone writes into the box after an agree step. It does not send by itself. Voice commands stay off until Settings is switched on.
+
+**Language.** A specific `lang` wins. `auto` uses the saved code, then the browser languages, then English. An Africa/Addis Ababa time zone can offer Amharic. It does not switch by itself. "Suggest a language for my area" uses geolocation once, matches `regions.json`, and drops the coordinates. Arabic sets `dir="rtl"`.
+
+**Talk to a person.** The dialog topics are tutor, careers, alerts, and accommodation. Leave a message POSTs `/v1/escalations`. Accommodation POSTs a ticket with up to eight sample listings. It does not open Telegram. The Telegram control is a link. If the post cannot be sent, the status is "Saved on this phone. It will send when you are online." The three send paths do not set `language` on the body, so the API stores `en`.
+
+**Accessibility panel.** Contrast, dyslexia font, text size, spacing, large cursor, link highlight, and hover-read. Host changes go through `<style id="db-a11y-effects">` and classes on `<html>`. Details are in [CONFORMANCE.md](CONFORMANCE.md).
+
+**Privacy.** Capture stays off until a click, except display tools restored from `localStorage`. "Clear my saved data" deletes `db-assistant:` keys in `localStorage` and `sessionStorage`. Server tickets are a JSON file. There is no delete route. See [../README.md](../README.md) for the full privacy table.
+
+## Environment
+
+Names only. "Set" means the local `.env` on this machine had a nonempty value on 16 Nov 2026. Values are not printed. `.env` is gitignored.
+
+| Name | Used by | Required? | In `.env.example`? | Local `.env` |
+| --- | --- | --- | --- | --- |
+| `PORT` | API | Optional, default 3000 | No | Set |
+| `AI_PROVIDER` | API, Compose | Optional, Compose default `none` | No | Set |
+| `GEMINI_API_KEY` | API | Optional | No | Set |
+| `GEMINI_MODEL` | API | Optional | No | Set |
+| `GEMINI_TTS_MODEL` | API | Optional | No | Absent |
+| `TTS_PROVIDER` | API | Optional, default `none` | No | Set |
+| `ADDIS_API_KEY` | API | Optional | No | Set |
+| `ADDIS_BASE_URL` | API | Optional | No | Set |
+| `OLLAMA_BASE_URL` | API | Optional, only for Ollama | Yes, empty | Absent |
+| `OLLAMA_MODEL` | API | Optional, only for Ollama | Yes, empty | Absent |
+| `HELPER_TOKEN` | API list and PATCH | Optional for creating tickets | Yes, nonempty | Set, same value as the example |
+| `TELEGRAM_BOT_USERNAME` | Health and the widget link | Optional | Yes, `alxtestsbot` | Set, `alxtestsbot` |
+| `ALLOWED_ORIGINS` | CORS | Optional, Compose default `http://localhost:8080` | No | Set |
+
+Replace the example helper token with your own. Do not commit a live token.
+
+## Run and test
 
 ```bash
-docker compose up
+cd multilingual-assistant
+cp .env.example .env
+docker compose up --build
 ```
 
-`make serve` runs the same command.
-
-- Savanna pages: <http://localhost:8080/pages/homepage-v1-paced.html>, <http://localhost:8080/pages/homepage-v1-self-paced.html>, <http://localhost:8080/pages/concept-with-navigation.html>
-- Blank page (no Bootstrap): <http://localhost:8080/demo/blank.html>
-
-`cd savanna && python3 -m http.server 8000` serves the frozen pages alone. The widget's script URL is `/module/db-assistant.js`, which that server does not host.
-
-## Install
-
-```html
-<script src="https://HOST/module/db-assistant.js" data-lang="auto" data-api="https://HOST/api" data-content="/content.json" defer></script>
-```
-
-## Layout
-
-```
-README.md  CONFORMANCE.md  LICENSE  docker-compose.yml  nginx.conf  .env.example  openapi.yaml  Makefile
-module/    db-assistant.js, i18n/ (en, am, om, ti, so, ar, languages.json), providers/none.js, providers/cloud.js, assets/
-api/       Express server (ask, speech, translate, tickets, SMS, docs)
-demo/      blank.html, content.json, data/
-savanna/   starter pages, plus one script tag before </body>
-```
-
-## Check
+Then open http://localhost:8080/demo/blank.html , http://localhost:8080/pages/concept-with-navigation.html , http://localhost:8080/pages/jobs.html , http://localhost:8080/docs , and http://localhost:8080/helper .
 
 ```bash
-npm install --prefix api
 node --test
+npm run axe
 ```
 
-That runs the offline scorer, the language-file check, and the API tests. The API tests install `express`, `cors`, `dotenv`, `swagger-ui-express`, and `yaml` under `api/`. They mock Gemini and do not call it.
+On 16 Nov 2026, Node v22.5.1: `node --test` was 68 pass, 0 fail, 0 skipped. `npm run axe` was 0 module critical and 0 module serious. See [CONFORMANCE.md](CONFORMANCE.md). `docker compose config` exited 0. `docker compose up` was not run as a clean clone.
 
-## Phase 3
+API-only notes: [api/README.md](api/README.md).
 
-Listen, the microphone, voice commands, and the host display tools are in the widget. Details and the honest limits are in `module/README.md`. On a machine with only English browser voices and no Addis or Gemini key, English can be spoken by the browser after a click. Amharic, Afaan Oromoo, Tigrinya, and Somali say that voice is not available unless Addis is configured or the device has a matching voice. Voice commands stay off until the person turns them on. They need Chrome and an internet connection.
+## API
 
-## Phase 2 limits
+Routes under `/api/v1/` plus `POST /sms/inbound`. Spec: [openapi.yaml](openapi.yaml). UI: `/docs`.
 
-`providers/cloud.js` calls `POST /api/v1/ask` only after `GET /api/v1/health` reports `ai: true`. Otherwise the widget says it is not connected and searches on the page. A model timeout returns the lesson excerpt and the widget says the model did not answer. Noto Sans Ethiopic is named and not downloaded. Addis speech needs the confirmations in `api/README.md`, including Somali, which is not in the published voice list.
+| Method | Path | Success |
+| --- | --- | --- |
+| GET | `/api/v1/health` | 200 |
+| POST | `/api/v1/ask` | 200 |
+| POST | `/api/v1/content` | 201 |
+| POST | `/api/v1/tts` | 200 or 501 |
+| POST | `/api/v1/translate` | 200, or 503 if Gemini is off |
+| POST | `/api/v1/escalations` | 201 |
+| GET | `/api/v1/escalations` | 200 with the helper token, else 401 or 503 |
+| PATCH | `/api/v1/escalations/{ticketId}` | 200, or 404 if the id is unknown |
+| POST | `/api/v1/webhooks` | 201 |
+| POST | `/sms/inbound` | 200 plain text, at most 160 characters |
 
-The widget does not call speech until the person uses Listen, Read, hover-to-read, or a voice command they started. `db-assistant.js` on disk is about 160 KB. Language files, `speech-cloud.js`, `speech-browser.js`, `voice-match.js`, `regions.js`, `page-translate.js`, `help-link.js`, and `data/regions.json` load when needed.
+Copy-paste curls are in [../README.md](../README.md).
 
-## Phase 4 limits
+## Use it on another website
 
-The area language is a guess from the nearest town in `module/data/regions.json`. The coordinates are approximate and need review by a local reader. The check works on HTTPS or localhost. The position is not stored and is not sent. Outside Ethiopia, or when the browser will not share a position, the current language stays.
+Three ways to test.
 
-Page translation needs Gemini (`ai: true` on `/api/v1/health`). It sends the visible page text to that API only after the person presses Translate this page. It does not use the Google Translate widget or the Chrome Translator API. A page the site is already translating with Google Translate is left alone. The whole page body is included, not only `<main>`. At most about 60,000 characters of distinct text are sent, on-screen text first. Show original puts the previous text back. If translation is not connected, the panel says so and mentions the browser's own Translate option.
+**1. Same server.** The commands above. `data-api="/api"` and `data-content="/demo/content.json"` match the pages in this folder.
 
-The lesson file marks its sections with `h4`, so a page with no `data-content` only indexes `h1`–`h3`. The Savanna pages ship with `data-content="/demo/content.json"`, which includes those `h4` sections.
+**2. Second local origin.** Keep Compose on port 8080. Serve a small HTML file on another port. Point the script, `data-api`, and `data-content` at `http://localhost:8080/...` with full URLs. Add `http://localhost:THAT_PORT` to `ALLOWED_ORIGINS` and recreate the API container. Until nginx sends CORS on `/module/`, the language fetch from the other port fails and the panel stays hidden. Same-origin test 1 does not have that problem.
 
-## Phase 5
+**3. Tunnel.** Run Compose, then a tunnel to port 8080. Use the `https://` URL as the page, the script, and `data-api`. Set `ALLOWED_ORIGINS` to the page origin. The tunnel URL changes each run. Do not put API keys in the page.
 
-Talk to a person is one button in the panel. It opens a dialog. A tutor answers, and that can take until morning. The person can leave a message, open Telegram, or read how the text-message demo works.
+More attribute and event detail is in [../README.md](../README.md).
 
-Leave a message calls `POST /api/v1/escalations` with the conversation so far, the language, the topic, and the page address, heading, and any selected text. If the phone is offline, or the request does not go through, the message is kept in `localStorage` under `db-assistant:outbox` and the panel says: "Saved on this phone. It will send when you are online." It sends when the browser is online again. Clear my saved data removes that queue.
+## Add a language
 
-Telegram link, when a bot username is set:
+1. Copy `module/i18n/en.json` to `module/i18n/<code>.json` and translate every user-visible string. Keep the keys.
+2. Put `code`, `name`, `dir`, `speech`, and `addis` in that file's `language` object and in `module/i18n/languages.json`. Use `"dir": "rtl"` only when the script needs RTL.
+3. Run `node --test`. The catalog test fails if a key is missing or a sentence is still the English sentence.
+4. Restart the API. It reads `languages.json` at startup.
 
-```text
-https://t.me/<username>?start=<lang>_<topic>
-```
+You do not edit `help-link.js` or `speech-browser.js` for the new code. Speech tags and Addis ids come from the list.
 
-`start` payload is `lang_topic`. `lang` is the widget language: `en`, `am`, `om`, `ti`, `so`, or `ar`. `topic` is one of `tutor`, `careers`, `alerts`, `accommodation`. Example: `https://t.me/SavannaTutorBot?start=am_accommodation`. The username comes from `GET /api/v1/health` field `telegram` (`TELEGRAM_BOT_USERNAME`, the leading `@` is dropped) or from `data-telegram` on the script tag. The attribute wins when both are set. This repository does not include the bot. If neither name is set, the panel says Telegram is not set up.
+## Tests and axe
 
-Text messaging on this site is a documented demo. There is no phone number. `POST /sms/inbound` takes JSON `{ "from", "text" }` and returns plain text of at most 160 characters. See `api/README.md`.
+| Command | Result on 16 Nov 2026 |
+| --- | --- |
+| `node --test` | 68 pass, 0 fail, 0 skipped, Node v22.5.1 |
+| `npm run axe` | axe-core 4.10.3, viewport 1280×900, Chrome. Module 0 critical / 0 serious on blank, concept, and jobs, five states each. Concept host: 1 critical and 4 serious per state. |
 
-"I need an accommodation for my interview" opens a ticket with `topic` `accommodation` and the sample listings from `demo/data/jobs.json`. The widget dispatches `db-assistant:escalated` with `{ ticketId }` after the server accepts the ticket.
+Manual scripts that were not run: [docs/TESTING.md](docs/TESTING.md).
 
-Screen sharing is off until the person turns it on in Settings and then presses Share my screen. That press is the only call to `getDisplayMedia`. A bar says "You are sharing your screen" and explains that this is a preview on the device: a helper cannot see it, because this page has no helper connection. Stop ends it. Chrome for Android is treated as unsupported even when `getDisplayMedia` exists. The setting then offers "Send what page I'm on", which puts the page address, heading, and selected text on a helper ticket. The helper desk at `/helper` shows that page context and any listings on the ticket.
+## Known limits
+
+- Widget tickets omit `language`, so they are stored as `en`.
+- The configured bot username is `alxtestsbot`. The code fallback is `alxjobsbot`. @alxjobsbot does not read the `start` payload. @alxtestsbot does.
+- `.env.example` is missing several variables the API reads, and its `HELPER_TOKEN` is nonempty.
+- Page translation's "Experimental" label is commented out.
+- Advice is a phrase list.
+- Ollama was tested with a fake `fetch` only.
+- Oromo, Tigrinya, and Somali speech were not listened to. Somali has no default Addis voice id.
+- Translations still have `_needsReview` flags. Counts are in the root README.
+- SMS is a JSON demo. Tigrinya SMS with no `language` field is searched as Amharic.
+- Screen share is a local preview. Chrome on Android is offered "send this page" instead.
+- nginx does not gzip, and it does not send CORS on `/module/`.
+- There is no service worker.
+- Open Badges and LTI 1.3 were not built.
+- Co-designer, NVDA, TalkBack, Slow 3G, and a clean-clone Compose start are not recorded.
+- `data-theme` is stored and unused.
+- `api/data/alx-kb.json` is not read by the server. The loaded knowledge file is `demo/data/alx-knowledge.json`.
